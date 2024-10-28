@@ -1,6 +1,8 @@
 import pygame
 from Player import *
 from Enemy import *
+from Question import *
+from GameState import *
 
 BLUE = (106, 159, 181)
 WHITE = (255, 255, 255)
@@ -9,9 +11,14 @@ class Level:
     def __init__(self, window):
         self.window = window
         self.player = Player(800//2, 600//2, 1000)
-        self.ring0 : list[Enemy] = []
+        self.questions: list[Question] = []
+        self.enemyList : list[Enemy] = []
         self.bullets : list[Bullet] = []
+        self.initQuestions()
         self.initEnemies()
+    
+    def initQuestions(self):
+        self.questions.append(Question('What is 1+1?', '2'))
 
     def initEnemies(self):
         num_enemies = 8
@@ -27,21 +34,26 @@ class Level:
 
             # Create the enemy with the specified starting angle
             enemy = Enemy(self.window, (0,0,255), 3, center_x, center_y, 200, angle, 0.05)
-            self.ring0.append(enemy)
-    
-    def checkAnswer(self, answerString):
-        pass
+            self.enemyList.append(enemy)
 
     def mainloop(self, eventList : list[pygame.event.Event]):
         self.window.fill(BLUE)
+
+        if len(self.questions) == 0:
+            return GameState.FINISH
 
         for bullet in self.bullets:
             bullet.update()
             bullet.draw(self.window)
 
-        self.player.update(self.window, self.bullets, eventList)
+        self.player.update(self.window, self.bullets, eventList, self.questions)
 
         curtime = time.time()
-        for enemy in self.ring0:
+        for enemy in self.enemyList:
             enemy.update(curtime, self.bullets)
+        
+        for question in self.questions:
+            question.draw(self.window,800-150-5,600-60-5)
+        
+
             

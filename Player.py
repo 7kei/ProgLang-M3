@@ -1,6 +1,7 @@
 import pygame
 from pygame import Rect
 from Enemy import *
+from Question import *
 
 class Player:
     def __init__(self, x, y, maxHealth):
@@ -15,7 +16,7 @@ class Player:
         self.inputBox = Rect(self.x-150/2, self.y-150, 150, 60)
         
 
-    def update(self, window, bulletList : list[Bullet], eventList:list[pygame.event.Event]):
+    def update(self, window, bulletList : list[Bullet], eventList:list[pygame.event.Event], questionList:list[Question]):
         # Check if bullet hit us
         for bullet in bulletList:
             if self.hitbox.collidepoint(bullet.pos):
@@ -25,8 +26,13 @@ class Player:
         for event in eventList:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
-                    # Submit input
+                    # Check input
+                    for i in range(len(questionList)):
+                        curQues = questionList[i]
+                        if curQues.checkAnswer(self.inputText):
+                            questionList.remove(curQues)
                     self.inputText = ''
+
                 elif event.key == pygame.K_BACKSPACE:
                     self.inputText = self.inputText[:-1]
                 else:

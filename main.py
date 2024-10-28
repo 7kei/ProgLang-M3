@@ -10,10 +10,6 @@ from Level import *
 BLUE = (106, 159, 181)
 WHITE = (255, 255, 255)
 
-class GameState(Enum):
-    QUIT = -1
-    TITLE = 0
-    NEWGAME = 1
 
 def create_surface_with_text(text, font_size, text_rgb, bg_rgb):
     """ Returns surface with text written on """
@@ -116,6 +112,41 @@ def title_screen(screen):
 
         pygame.display.flip()
 
+def finish_level(screen):
+    start_btn = UIElement(
+        center_position=(400, 400),
+        font_size=30,
+        bg_rgb=BLUE,
+        text_rgb=WHITE,
+        text="Finish!",
+        action=None,
+    )
+    quit_btn = UIElement(
+        center_position=(400, 500),
+        font_size=30,
+        bg_rgb=BLUE,
+        text_rgb=WHITE,
+        text="Quit",
+        action=GameState.QUIT,
+    )
+
+    buttons = [start_btn, quit_btn]
+
+    while True:
+        mouse_up = False
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                mouse_up = True
+        screen.fill(BLUE)
+
+        for button in buttons:
+            ui_action = button.update(pygame.mouse.get_pos(), mouse_up)
+            if ui_action is not None:
+                return ui_action
+            button.draw(screen)
+
+        pygame.display.flip()
+
 def play_level(screen):
     return_btn = UIElement(
         center_position=(140, 570),
@@ -132,9 +163,12 @@ def play_level(screen):
     while True:
         eventList = pygame.event.get()
 
-        level.mainloop(eventList)
+        res = level.mainloop(eventList)
         if level.player.currentHealth <= 0:
             return GameState.TITLE
+        
+        if res == GameState.FINISH:
+            return res
 
         mouse_up = False
         for event in eventList:
@@ -162,6 +196,9 @@ def main():
 
         if game_state == GameState.NEWGAME:
             game_state = play_level(screen)
+
+        if game_state == GameState.FINISH:
+            game_state = finish_level(screen)
 
         if game_state == GameState.QUIT:
             pygame.quit()
