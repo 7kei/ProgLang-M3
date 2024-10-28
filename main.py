@@ -130,12 +130,14 @@ def play_level(screen):
     clock = pygame.time.Clock()
 
     while True:
-        level.mainloop()
+        eventList = pygame.event.get()
+
+        level.mainloop(eventList)
         if level.player.currentHealth <= 0:
             return GameState.TITLE
 
         mouse_up = False
-        for event in pygame.event.get():
+        for event in eventList:
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 mouse_up = True
 

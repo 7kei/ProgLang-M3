@@ -28,15 +28,18 @@ class Level:
             # Create the enemy with the specified starting angle
             enemy = Enemy(self.window, (0,0,255), 3, center_x, center_y, 200, angle, 0.05)
             self.ring0.append(enemy)
+    
+    def checkAnswer(self, answerString):
+        pass
 
-    def mainloop(self):
+    def mainloop(self, eventList : list[pygame.event.Event]):
         self.window.fill(BLUE)
 
         for bullet in self.bullets:
             bullet.update()
             bullet.draw(self.window)
 
-        self.player.update(self.window, self.bullets)
+        self.player.update(self.window, self.bullets, eventList)
 
         curtime = time.time()
         for enemy in self.ring0:
