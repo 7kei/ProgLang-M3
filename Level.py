@@ -26,7 +26,7 @@ class Level:
             angle = i * angle_between_enemies
 
             # Create the enemy with the specified starting angle
-            enemy = Enemy(self.window, (0,0,255), 3, center_x, center_y, 200, angle, 0.05)
+            enemy = Enemy(self.window, (255,182,193), 3, center_x, center_y, 200, angle, 0.005)
             self.ring0.append(enemy)
 
     def mainloop(self):

@@ -18,6 +18,9 @@ class Bullet:
     def draw(self, screen):
         pygame.draw.circle(screen, (255, 0, 0), (int(self.pos[0]), int(self.pos[1])), 5)
 
+"""
+
+"""
 class Enemy:
     def __init__(self, window, color, dmgAmt, center_x, center_y, radius, angle, speed):
         self.window = window
@@ -29,7 +32,9 @@ class Enemy:
         self.angle = angle          # Starting angle
         self.speed = speed          # Speed of circular motion
         self.last_fired = time.time()
-
+    """
+    
+    """
     def update(self, curtime, bullet_list):
         # Update position based on the circular path
         self.x = int(self.center_x + self.radius * math.cos(self.angle))
