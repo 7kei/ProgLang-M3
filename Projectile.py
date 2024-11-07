@@ -2,6 +2,8 @@ import pygame
 import math
 import os
 
+from Player import *
+
 class Projectile(pygame.sprite.Sprite):
     def __init__(self, x, y, target_x, target_y, path_to_frames):
         super().__init__()
