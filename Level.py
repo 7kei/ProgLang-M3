@@ -3,6 +3,9 @@ import pygame
 from Player import *
 from Projectile import *
 from GameState import *
+from Boss import *
+from Comet import *
+from Enemy import *
 from pygame.sprite import Group
 
 class Level:
@@ -14,9 +17,12 @@ class Level:
         self.window = window
         self.kill_count = 0
         self.clock = pygame.time.Clock()  # Initialize the clock to control FPS
+        self.level_time = pygame.time.get_ticks()  # Track the level time (shared timer)
+
 
         # Instantiate the Player object
-        self.player = Player(x=100, y=700, max_health=100)
+        self.player = Player(x=100, y=790, max_health=100)
+        self.boss = Boss(self.level_time, x=1300, y=200, scale=2)  # Adjust coordinates for upper right placement
         
         # Group for projectiles
         self.projectiles = Group()
@@ -41,6 +47,23 @@ class Level:
         self.item_positions = [(650, 800), (750, 800), (850, 800)]
         self.selected_item = None  # Track the currently selected item
 
+        # Group for comets
+        self.comets = pygame.sprite.Group()  
+
+        # Group for enemies
+        self.enemies = Group()
+
+        # Timer to track enemy spawn intervals
+        self.last_enemy_spawn_time = pygame.time.get_ticks()
+    
+    def spawn_enemy(self):
+        """Spawn an enemy (bat) if enough time has passed."""
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_enemy_spawn_time > 2000:  # Spawn every 2 seconds
+            enemy = Enemy(self.player)  # Create a new enemy targeting the player
+            self.enemies.add(enemy)
+            self.last_enemy_spawn_time = current_time
+
     def redraw_game_window(self):
         """Redraw the entire game window."""
         # Redraw background
@@ -61,6 +84,7 @@ class Level:
 
         # Draw the player and other game entities
         self.player.draw(self.window)
+        self.boss.draw(self.window)  # Draw the boss
 
         # Draw all projectiles
         for projectile in self.projectiles:
@@ -75,6 +99,16 @@ class Level:
                 # Draw the untoggled image if not selected
                 self.window.blit(item_data['untoggled'], self.item_positions[idx])
         
+         # Draw all comets
+        for comet in self.comets:
+            comet.draw(self.window)
+        self.comets.draw(self.window)  # Draw the comets on the screen
+
+        # Draw all enemies
+        for enemy in self.enemies:
+            enemy.draw(self.window)
+        self.enemies.draw(self.window)
+
         # Update display
         pygame.display.flip()  # Update the screen with everything drawn
 
@@ -107,6 +141,17 @@ class Level:
         # Update game elements
         self.player.update()  # Update player animation and position
         self.projectiles.update()  # Update projectiles (movement, collision checks, etc.)
+
+        # Boss update, passing the shared level_time and player position
+        self.boss.update(self.level_time, self.comets, self.player.x)
+
+        # Update comets
+        self.comets.update()  # Update comet positions and animations
+        
+
+        # Spawn and update enemies
+        self.spawn_enemy()  # Spawn new enemies every 2 seconds
+        self.enemies.update()  # Update enemy movement and animations
 
         # Redraw everything
         self.redraw_game_window()  # Call the redraw function

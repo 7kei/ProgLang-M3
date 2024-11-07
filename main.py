@@ -4,7 +4,6 @@ import random
 
 from pygame.sprite import *
 from pygame.rect import *
-
 from enum import Enum
 from Level import *
 from GameState import *

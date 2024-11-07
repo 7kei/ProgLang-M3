@@ -113,6 +113,8 @@ class Player(pygame.sprite.Sprite):
 
         # Flip the frame if the player is facing left
         self.image = pygame.transform.flip(frame, True, False) if not self.facing_right else frame
+        
+        # Update rect to center the player sprite
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def update(self):
@@ -121,8 +123,8 @@ class Player(pygame.sprite.Sprite):
         self.update_animation()  # Update the animation frame regardless of input
 
         # Prevent the player from falling below the ground level (e.g., 500 is the ground level)
-        if self.y >= 700:
-            self.y = 700  # Reset position to ground level
+        if self.y >= 790:
+            self.y = 790  # Reset position to ground level
             self.is_jumping = False
             self.jumpCount = 10  # Reset jump count
             
@@ -141,6 +143,7 @@ class Player(pygame.sprite.Sprite):
         # Pass path to the projectile's animation frames
         projectile_path = f'D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/projectile'  # Example path for your projectile animation frames
         return Projectile(self.x+100, self.y+100, mouse_x, mouse_y, projectile_path)
+
     
     def take_damage(self, amount):
         self.currentHealth -= amount
@@ -151,18 +154,14 @@ class Player(pygame.sprite.Sprite):
         self.healthBar.heal(amount)
     
     def draw(self, window):
-        """Draw the player on the game window."""
-        window.blit(self.image, (self.x, self.y))
-        
-        # Player Hitbox
-        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 5)
+        """Draw the player on the game window and show the rectangle."""
+        # Draw the player sprite using rect to ensure it's centered
+        window.blit(self.image, self.rect.topleft)  # Draw the image at the top-left of the rect
 
-        # Health Bar
-        self.healthBar.draw(window)
+        # Optional: Draw the rectangle around the player for visualization
+        # Reduce the size of the rectangle by half (you can change the factor as needed)
+        reduced_width = self.rect.width // 3.5
+        reduced_height = self.rect.height // 2
+        reduced_rect = pygame.Rect(self.rect.centerx - reduced_width // 2, self.rect.centery - reduced_height // 2, reduced_width, reduced_height)
 
-        # # Input Rectangle
-        # pygame.draw.rect(window, (255, 255, 255), self.inputBox)
-
-        # # Input Text
-        # inputBoxTextSurface = pygame.font.SysFont('Arial', 12).render(self.inputText, True, pygame.Color(0, 0, 0))
-        # window.blit(inputBoxTextSurface, (self.inputBox.x, self.inputBox.y))
+        pygame.draw.rect(window, (255, 0, 0), reduced_rect, 2)  # Red rectangle with a 2-pixel border
