@@ -149,7 +149,7 @@ def finish_level(screen):
 
         pygame.display.flip()
 
-def play_level(screen):
+def play_level(screen, database):
     return_btn = UIElement(
         center_position=(140, 570),
         font_size=20,
@@ -159,7 +159,7 @@ def play_level(screen):
         action=GameState.TITLE,
     )
 
-    level = Level(screen)
+    level = Level(screen, database)
     clock = pygame.time.Clock()
 
     while True:
@@ -199,7 +199,7 @@ def main():
             game_state = title_screen(screen)
 
         if game_state == GameState.NEWGAME:
-            game_state = play_level(screen)
+            game_state = play_level(screen, database)
 
         if game_state == GameState.FINISH:
             game_state = finish_level(screen)

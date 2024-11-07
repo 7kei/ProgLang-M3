@@ -9,10 +9,7 @@ class Database:
         # Question Table schema:
         # question    : TEXT    -> the question text
         # answer      : TEXT    -> the question answer
-        # difficulty  : INTEGER -> 0 = easy (default)
-        #                       -> 1 = medium
-        #                       -> 2 = hard
-        self.cursor.execute("CREATE TABLE IF NOT EXISTS questions (question TEXT, answer TEXT, difficulty INTEGER)")
+        self.cursor.execute("CREATE TABLE IF NOT EXISTS questions (question TEXT, answer TEXT)")
 
         # Leaderboard Table schema:
         # player_name : TEXT    -> player name
@@ -26,16 +23,19 @@ class Database:
         rows = self.cursor.execute("SELECT * FROM questions").fetchall()
         return rows
     
-    def insertIntoQuestions(self, question, answer, difficulty):
-        self.cursor.execute("INSERT INTO questions VALUES (?, ?, ?)",
-                            (question, answer, difficulty))
+    def insertIntoQuestions(self, question: str, answer: str):
+        currentQuestions = [i[0] for i in self.getQuestions()]
+        if question in currentQuestions:
+            return
+        self.cursor.execute("INSERT INTO questions VALUES (?, ?)",
+                            (str(question), str(answer)))
         self.conn.commit()
     
     def getLeaderboard(self):
         rows = self.cursor.execute("SELECT * FROM leaderboard").fetchall()
         return rows
     
-    def insertIntoLeaderboard(self, name, killCount, timeSpent):
+    def insertIntoLeaderboard(self, name: str, killCount: int, timeSpent: int):
         self.cursor.execute("INSERT INTO leaderboard VALUES (?, ?, ?)",
                             (name, killCount, timeSpent))
         self.conn.commit()
