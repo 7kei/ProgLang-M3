@@ -15,6 +15,7 @@ RED = (204, 0, 0)
 pygame.init()
 pygame.font.init()
 fount = "New folder/JainiPurva-Regular.ttf"
+player_name =""
 
 try:
     font = pygame.font.Font("C:/Users/ANYA/ProgLang/ProgLang-M3/New folder/JainiPurva-Regular.ttf", 32)
@@ -80,8 +81,9 @@ def title_screen(screen):
     #New folder\main1.png
 
     start_btn = UIElement((400, 400), "START", 60, None,WHITE, action=GameState.NEWGAME)
-    quit_btn = UIElement((400, 450), "QUIT GAME", 30, None, WHITE, action=GameState.QUIT)
-    buttons = [start_btn, quit_btn]
+    quit_btn = UIElement((400, 490), "QUIT GAME", 30, None, WHITE, action=GameState.QUIT)
+    leaderboard_btn = UIElement((400, 450), "LEADERBOARD", 30, None, WHITE, action=GameState.LEADERBOARD)
+    buttons = [start_btn, quit_btn, leaderboard_btn]
 
     
     frame = 0 
@@ -132,37 +134,26 @@ def play_level(screen):
 
     clock = pygame.time.Clock()
     while True:
-        # Clear the screen and redraw the background first to prevent blinking
+
         screen.blit(background, (0, 0))  
 
-        # Handle events
         event_list = pygame.event.get()
         if level.player.currentHealth <= 0:
             return GameState.GAMEOVER
 
-        # Process level updates
         res = level.mainloop(event_list)
         if res == GameState.FINISH:
-            return res  # Handle finish state (e.g., next level or victory)
+            return res 
 
-        # Mouse interaction for buttons
         mouse_up = False
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 mouse_up = True
-        
-        # Handle button update and check if clicked
         ui_action = return_btn.update(pygame.mouse.get_pos(), mouse_up)
         if ui_action:
             return ui_action  # Return the action (e.g., go to main menu)
-
-        # Draw the button on top of the background (after everything else)
         return_btn.draw(screen)
-
-        # Update the screen
         pygame.display.flip()
-
-        # Control the frame rate
         clock.tick(60)
 
 
@@ -189,8 +180,7 @@ def loading_screen(screen):
     
     
     # Create the Quit button
-    return_btn = UIElement((680, 60), "Main Menu", 30, None, WHITE, action=GameState.TITLE)
-    buttons = [return_btn]
+    
 
     # Set up a clock for managing the frame rate
     clock = pygame.time.Clock()
@@ -201,14 +191,39 @@ def loading_screen(screen):
 
         delay_counter += 1
         if delay_counter >= frame_delay:
-            frame = (frame + 1) % len(animation)  # Cycle to the next frame
-            delay_counter = 6 # Reset the counter
-
-        # Exit loading screen after 3 seconds
+            frame = (frame + 1) % len(animation) 
+            delay_counter = 6 
         if elapsed_time >= 5:
-            return  # Exit the function to continue to the game
+            return 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return GameState.QUIT
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                mouse_up = True
 
-        # Event handling
+        screen.blit(background, (0, 0))
+        screen.blit(title1_text, title1_rect)
+        screen.blit(animation[frame], (0,0))
+        pygame.display.flip()
+        clock.tick(30)  
+
+def leaderboard(screen):
+    background = pygame.image.load("New folder/mainbackground.png")
+    screen.blit(background, (0, 0)) 
+    start_btn = UIElement((110, 70), "MAIN MENU", 30, None,WHITE, action=GameState.NEWGAME)
+    quit_btn = UIElement((690, 70), "QUIT GAME", 30, None, WHITE, action=GameState.QUIT)
+    buttons = [start_btn, quit_btn]
+
+    game_state = GameState.LEADERBOARD
+
+    title1_font = pygame.font.Font(fount,60)  # Larger font for title
+    title1_text = title1_font.render("LEADERBOARD", True, WHITE)
+    title1_rect = title1_text.get_rect(center=(400,150))  # Position at the top center
+
+    while True:
+        mouse_up = False
+
+        # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return GameState.QUIT
@@ -218,28 +233,64 @@ def loading_screen(screen):
         # Clear the screen and display the background image again
         screen.blit(background, (0, 0))
         screen.blit(title1_text, title1_rect)
-        screen.blit(animation[frame], (0,0))
 
-        # Draw and update buttons
+        # Update buttons and check if clicked
         for button in buttons:
             ui_action = button.update(pygame.mouse.get_pos(), mouse_up)
             if ui_action:
-                return ui_action  # Return the action associated with the button (GameState.QUIT)
+                return ui_action  # Return action (NEWGAME or QUIT)
             button.draw(screen)
 
-        # Update the display and control the frame rate
+        # Update the screen
         pygame.display.flip()
-        clock.tick(30)  # Set the frame rate to 30 FPS
-        
+
+def story_screen(screen):
+
+    background = pygame.image.load("New folder/mainbackground.png")
+    screen.blit(background, (0, 0)) 
+    
+
+    game_state = GameState.STORY
+
+    title1_font = pygame.font.Font(fount,60)  # Larger font for title
+    title1_text = title1_font.render("", True, WHITE)
+    title1_rect = title1_text.get_rect(center=(400,150))  # Position at the top center
+
+    while True:
+        mouse_up = False
+        screen.blit(background, (0, 0))
+        screen.blit(title1_text, title1_rect)
+        pygame.display.flip()
+
+
+
+def player_name(screen):
+    # Load background image
+    background = pygame.image.load("New folder/storytime.png")
+    screen.blit(background, (0, 0))  # Draw background on screen
+
+    # Create font for title text
+    title1_font = pygame.font.Font(None, 23)  # Specify a valid font here
+    title1_text = title1_font.render("Who's there?", True, WHITE)
+    title1_rect = title1_text.get_rect(center=(200, 150))  # Adjust text position
+    screen.blit(title1_text, title1_rect)  # Display title text
+
+    # Display instructions
+    instruction_font = pygame.font.Font(None, 18)
+    instruction_text = instruction_font.render("What's your name? ", True, WHITE)
+    instruction_rect = instruction_text.get_rect(center=(200, 250))
+       
 def game_over(screen):
     background = pygame.image.load("New folder/gameover.png")
-    title1_font = pygame.font.Font(fount, 50)  # Larger font for title
+    title1_font = pygame.font.Font(fount, 90)  # Larger font for title
     title1_text = title1_font.render("GAME OVER!", True, WHITE)
     title1_rect = title1_text.get_rect(center=(400, 300))  # Position at the top center
 
     # Define buttons
     start_btn = UIElement((400, 400), "START", 60, None, WHITE, action=GameState.NEWGAME)
     quit_btn = UIElement((400, 450), "QUIT GAME", 30, None, WHITE, action=GameState.QUIT)
+    #quit_btn = UIElement((400, 450), "QUIT GAME", 30, None, WHITE, action=GameState.QUIT)
+
     buttons = [start_btn, quit_btn]
 
     while True:
@@ -265,8 +316,6 @@ def game_over(screen):
 
         # Update the screen
         pygame.display.flip()
-        
-
 
 def finish_level():
     pass
@@ -286,7 +335,10 @@ def main():
             game_state = finish_level()
         elif game_state == GameState.QUIT:
             pygame.quit()
-            return
-        
+        elif game_state == GameState.GAMEOVER:
+            game_state = game_over(screen)
+        elif game_state == GameState.LEADERBOARD:
+            game_state == leaderboard(screen)
+
 if __name__ == "__main__":
     main() 
