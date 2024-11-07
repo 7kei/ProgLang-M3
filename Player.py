@@ -148,10 +148,14 @@ class Player(pygame.sprite.Sprite):
         self.currentHealth -= amount
         self.healthBar.damage(amount)
 
-    def heal(self, amount):
-        self.currentHealth += amount
-        self.healthBar.heal(amount)
-    
+    def heal(self, amt):
+        if self.currentHealth >= self.maxHealth:
+            return
+        if self.currentHealth + amt >= self.maxHealth:
+            self.currentHealth = self.maxHealth
+            self.currentHealth += amt
+            self.currentHealth = min(self.currentHealth + amt, self.maxHealth)
+
     def draw(self, window):
         """Draw the player on the game window and show the rectangle."""
         # Draw the player sprite using rect to ensure it's centered

@@ -1,3 +1,4 @@
+from Question import Question
 import pygame
 import os
 import random
@@ -19,10 +20,12 @@ class Enemy(pygame.sprite.Sprite):
             self.x = random.randint(0, 1800)
             self.y = -50
 
-        self.scale = scale  # Keep scale for other uses if necessary
+        self.scale = scale
         self.speed = 3
         self.animation_speed = 0.2
-        self.flipped = False  # Track whether the sprite is flipped or not
+        self.flipped = False
+        self.last_frame_update = pygame.time.get_ticks() / 1000.0  # Convert to seconds
+        self.last_fired = pygame.time.get_ticks() / 1000.0
 
         # Randomly choose enemy type: 0 for positive, 1 for negative
         self.enemy_type = random.choice([0, 1])
@@ -34,8 +37,9 @@ class Enemy(pygame.sprite.Sprite):
         self.image = self.frames[self.animation_index]
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
-        # Set the player reference to follow dynamically
+        # Set the player reference and window
         self.player = player
+        self.window = None  # Will be set when drawing
 
     def load_animation(self, path):
         """Load and downsize all images in a folder as animation frames."""
@@ -92,4 +96,28 @@ class Enemy(pygame.sprite.Sprite):
         reduced_height = self.rect.height // 1.125
         reduced_rect = pygame.Rect(self.rect.centerx - reduced_width // 2, self.rect.centery - reduced_height // 2, reduced_width, reduced_height)
 
-        pygame.draw.rect(window, (0, 255, 0), reduced_rect, 2)  # Green rectangle with a 2-pixel border for hitbox
+        # Update and draw the current animation frame
+        if Enemy.animation:
+            if curtime - self.last_frame_update > 0.1:  # Adjust time to control frame rate
+                self.animation_index = (self.animation_index + 1) % len(Enemy.animation)
+                self.last_frame_update = curtime
+            # Draw the animation frame at the calculated position
+            current_frame = Enemy.animation[self.animation_index]
+            frame_rect = current_frame.get_rect(center=(self.x, self.y))
+            self.window.blit(current_frame, frame_rect)
+        else:
+            # Fallback to a circle if no animation frames were loaded
+            pygame.draw.circle(self.window, self.color, (self.x, self.y), 30)
+
+        # Increment the angle to keep moving in a circular path
+        self.angle += self.speed * 0.5  # Adjust to control speed further if needed
+
+        if curtime - self.last_fired >= 0.5:
+            self.shoot(bullet_list)
+            self.last_fired = curtime
+
+    def shoot(self, bullet_list):
+        dx, dy = self.window.get_rect().center[0] - self.x, self.window.get_rect().center[1] - self.y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+        direction = (dx / distance, dy / distance)
+        bullet_list.append(Bullet([self.x, self.y], direction, self.dmgAmt))

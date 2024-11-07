@@ -89,6 +89,30 @@ class Boss(pygame.sprite.Sprite):
         # You can adjust the path to the comet animation folder here
         comet = Comet(player_x + 50, "assets/boss/comet", scale=2)
         comet_group.add(comet)
+    
+    def drawAnswerBox(self):
+        # Create a font for displaying the answer
+        font = pygame.font.SysFont("Arial", 24)
+        
+        # Render the player's current answer input
+        answer_surf = font.render(f"|{self.player_answer}|", True, (255, 255, 255))
+        
+        # Get the player's position or rect (assuming self.player has this attribute)
+        player_rect = self.player.rect if hasattr(self.player, 'rect') else pygame.Rect(0, 0, 50, 50)
+        
+        # Position the answer box above the player
+        answer_box_x = player_rect.centerx - answer_surf.get_width() // 2
+        answer_box_y = player_rect.top - answer_surf.get_height() - 10  # 10 pixels above the player
+        
+        # Draw the answer box at the calculated position
+        self.window.blit(answer_surf, (answer_box_x, answer_box_y))
+
+    def checkAnswer(self):
+        for enemy in self.enemyList[:]:  # Copy to allow safe removal
+            if enemy.question.checkAnswer(self.player_answer):
+                self.enemyList.remove(enemy)  # Remove enemy if answer matches
+                self.player_answer = ""  # Clear answer after correct response
+                break
 
     def take_damage(self, amount):
         self.health -= amount
