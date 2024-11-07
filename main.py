@@ -1,6 +1,8 @@
 import pygame
 import pygame.freetype
 
+from Database import *
+
 from pygame.sprite import Sprite
 from pygame.rect import Rect
 
@@ -185,6 +187,8 @@ def play_level(screen):
         pygame.display.flip()
 
 def main():
+    database = Database()
+
     pygame.init()
 
     screen = pygame.display.set_mode((800, 600))
