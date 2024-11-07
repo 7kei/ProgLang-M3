@@ -1,6 +1,8 @@
 import pygame
 import pygame.freetype
 import time
+from Database import *
+
 from pygame.sprite import Sprite
 from pygame.rect import Rect
 from enum import Enum
@@ -321,6 +323,10 @@ def finish_level():
     pass
     
 def main():
+    database = Database()
+
+    pygame.init()
+
     screen = pygame.display.set_mode((800, 600))
     game_state = GameState.TITLE
     while True:
