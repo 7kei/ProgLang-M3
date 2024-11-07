@@ -11,7 +11,7 @@ WHITE = (255, 255, 255)
 # Initialize pygame and font at the top to avoid errors
 pygame.init()
 pygame.font.init()
-fount = "C:/Users/ANYA/Downloads/New folder/JainiPurva-Regular.ttf"
+font = "C:/Users/ANYA/Downloads/New folder/JainiPurva-Regular.ttf"
 
 try:
     font = pygame.font.Font("C:/Users/ANYA/Downloads/New folder/JainiPurva-Regular.ttf", 32)
