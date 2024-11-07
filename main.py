@@ -20,7 +20,7 @@ fount = "New folder/JainiPurva-Regular.ttf"
 player_name =""
 
 try:
-    font = pygame.font.Font("C:/Users/ANYA/ProgLang/ProgLang-M3/New folder/JainiPurva-Regular.ttf", 32)
+    font = pygame.font.Font("New folder/JainiPurva-Regular.ttf", 32)
 except pygame.error as e:
     print("Error loading font:", e)
     font = pygame.font.Font(None, 32)  # Default fallback
@@ -128,11 +128,11 @@ def title_screen(screen):
         pygame.display.flip()  # Update the display
         clock.tick(30)  # Control the screen refresh rate (frame rate)
 
-def play_level(screen):
+def play_level(screen, database: Database):
     return_btn = UIElement((680, 60), "Main Menu", 30, None, WHITE, action=GameState.TITLE)
     background = pygame.image.load("New folder/mainbackground.png")
     
-    level = Level(screen)
+    level = Level(screen, database)
 
     clock = pygame.time.Clock()
     while True:
@@ -209,7 +209,7 @@ def loading_screen(screen):
         pygame.display.flip()
         clock.tick(30)  
 
-def leaderboard(screen):
+def leaderboard(screen, database: Database):
     background = pygame.image.load("New folder/mainbackground.png")
     screen.blit(background, (0, 0)) 
     start_btn = UIElement((110, 70), "MAIN MENU", 30, None,WHITE, action=GameState.NEWGAME)
@@ -218,9 +218,34 @@ def leaderboard(screen):
 
     game_state = GameState.LEADERBOARD
 
+    to_blit = []
+
     title1_font = pygame.font.Font(fount,60)  # Larger font for title
     title1_text = title1_font.render("LEADERBOARD", True, WHITE)
     title1_rect = title1_text.get_rect(center=(400,150))  # Position at the top center
+    to_blit.append((title1_text, title1_rect))
+
+    leaderboard = database.getLeaderboard()
+    sortByKill = sorted(leaderboard, key=lambda tup: tup[1], reverse=True)
+
+    counter = 0
+    for i in sortByKill:
+        name_font = pygame.font.Font(fount,30)
+        name_text = name_font.render(i[0], True, WHITE)
+        name_rect = name_text.get_rect(center=(110,250 + (50 * counter)))
+        to_blit.append((name_text, name_rect))
+
+        kill_font = pygame.font.Font(fount,30)
+        kill_text = kill_font.render(str(i[1]), True, WHITE)
+        kill_rect = kill_text.get_rect(center=(400,250 + (50 * counter)))
+        to_blit.append((kill_text, kill_rect))
+
+        time_font = pygame.font.Font(fount,30)
+        time_text = time_font.render(str(i[2]), True, WHITE)
+        time_rect = time_text.get_rect(center=(690,250 + (50 * counter)))
+        to_blit.append((time_text, time_rect))
+
+        counter += 1
 
     while True:
         mouse_up = False
@@ -234,7 +259,9 @@ def leaderboard(screen):
 
         # Clear the screen and display the background image again
         screen.blit(background, (0, 0))
-        screen.blit(title1_text, title1_rect)
+
+        for i in to_blit:
+            screen.blit(i[0], i[1])
 
         # Update buttons and check if clicked
         for button in buttons:
@@ -344,7 +371,7 @@ def main():
         elif game_state == GameState.GAMEOVER:
             game_state = game_over(screen)
         elif game_state == GameState.LEADERBOARD:
-            game_state == leaderboard(screen)
+            game_state == leaderboard(screen, database)
 
 if __name__ == "__main__":
     main() 

@@ -30,7 +30,7 @@ class Level:
     def initQuestions(self):
         curQues = self.databaseConnection.getQuestions()
         for i in curQues:
-            self.questions.append(Question(i[0], i[1]))
+            self.questions_dict[i[0]] = i[1]
 
     def initEnemies(self):
         num_enemies = 8
