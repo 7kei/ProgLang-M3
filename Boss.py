@@ -1,103 +1,101 @@
 import pygame
 import os
-import random
-from Comet import Comet
+
+from Comet import *
 
 class Boss(pygame.sprite.Sprite):
-    def __init__(self, x, y, health=100):
+    def __init__(self, level_time, x, y, scale=2):
         super().__init__()
 
-        # Position and health
+        # Position
         self.x = x
         self.y = y
-        self.health = health
+        self.scale = scale  # Scaling factor for boss size
+        self.health = 500  # Boss health
 
-        # Boss state and timing
-        self.spawned = False
-        self.is_dead = False
-        self.attack_timer = pygame.time.get_ticks()  # Timer for attack intervals
-        self.attack_interval = 5000  # Attack every 5 seconds
-        self.in_attack_animation = False
-
-        # Load animations
+        # Load animations with scaling
         self.animations = {
-            "spawn": self.load_animation('proglang proj/assets/boss/spawn'),
-            "idle": self.load_animation('proglang proj/assets/boss/idle'),
-            "attack": self.load_animation('proglang proj/assets/boss/attack'),
-            "death": self.load_animation('proglang proj/assets/boss/death')
+            "spawn": self.load_animation("assets/boss/spawn"),
+            "idle": self.load_animation("assets/boss/idle"),
+            "attack": self.load_animation("assets/boss/attack"),
+            "death": self.load_animation("assets/boss/death")
         }
 
-        # Set initial animation state
+        # Animation settings
         self.current_animation = "spawn"
         self.animation_index = 0
         self.image = self.animations[self.current_animation][self.animation_index]
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
-        # Comet tracking
-        self.comets = pygame.sprite.Group()
+        # Timers
+        self.last_attack_time = level_time  # Shared time reference
+        self.attack_interval = 5000  # Attack every 5 seconds
+        self.spawned = False  # To track if spawn animation is done
+        self.dead = False  # Track if the boss is dead
+        self.attack_started = False  # Track if an attack animation is active
+
+        # Animation speed controls
+        self.animation_speed = 0.15  # Controls how quickly frames change
 
     def load_animation(self, path):
-        """Load animation frames from a folder."""
-        return [pygame.image.load(os.path.join(path, img)) for img in sorted(os.listdir(path))]
+        """Load all images in a folder as animation frames and scale them."""
+        frames = [pygame.image.load(os.path.join(path, img)) for img in sorted(os.listdir(path))]
+        # Scale each frame based on self.scale
+        return [pygame.transform.scale(frame, (int(frame.get_width() * self.scale), int(frame.get_height() * self.scale))) for frame in frames]
 
     def update_animation(self):
-        """Update the current animation frame."""
-        self.animation_index += 0.1  # Adjust speed as necessary
+        """Update animation frame based on current action."""
+        self.animation_index += self.animation_speed
 
-        # Handle transitions after the animation completes
-        if self.animation_index >= len(self.animations[self.current_animation]):
-            if self.current_animation == "spawn" and not self.spawned:
-                self.spawned = True
+        if int(self.animation_index) >= len(self.animations[self.current_animation]):
+            if self.current_animation == "spawn":
                 self.current_animation = "idle"
+                self.animation_index = 0
+                self.spawned = True
             elif self.current_animation == "attack":
                 self.current_animation = "idle"
+                self.animation_index = 0
+                self.attack_started = False
             elif self.current_animation == "death":
-                self.kill()  # Remove the boss from the game after death animation
+                self.dead = True
 
-            # Reset animation index after completing each cycle
-            self.animation_index = 0
+            elif self.current_animation == "idle":
+                self.animation_index = 0
 
-        # Get the current frame
         self.image = self.animations[self.current_animation][int(self.animation_index)]
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
-    def attack(self, player_x):
-        """Perform an attack by creating a comet aimed at the player's x position."""
-        self.current_animation = "attack"
-        comet = Comet(player_x, -50)  # Spawn comet off-screen above the player's x position
-        self.comets.add(comet)
+    def update(self, level_time, comet_group, player_x):
+        """Handle animation updates and timing for attack."""
+        current_time = pygame.time.get_ticks()
 
-    def update(self, player_x):
-        """Update the boss's state and animations."""
-        if self.is_dead:
-            self.current_animation = "death"  # Set to death animation if boss is dead
-        else:
-            # Check if enough time has passed to perform another attack
-            current_time = pygame.time.get_ticks()
-            if current_time - self.attack_timer >= self.attack_interval:
-                self.attack(player_x)  # Spawn comet every attack interval
-                self.attack_timer = current_time  # Reset the attack timer
+        if self.dead:
+            return
 
-        # Update boss animation
+        # Trigger attack based on time
+        if self.spawned and not self.attack_started and current_time - self.last_attack_time >= self.attack_interval:
+            self.current_animation = "attack"
+            self.animation_index = 0
+            self.attack_started = True
+            self.last_attack_time = current_time
+
+            # Spawn a comet after the attack animation is triggered
+            self.spawn_comet(player_x, comet_group)
+
         self.update_animation()
 
-        # Update comets (falling projectiles) only if the boss is alive
-        if not self.is_dead:
-            self.comets.update()
-
-    def draw(self, window):
-        """Draw the boss and comets on the screen."""
-        window.blit(self.image, self.rect.topleft)
-
-        # Draw each comet in the comets group
-        for comet in self.comets:
-            comet.draw(window)
+    def spawn_comet(self, player_x, comet_group):
+        """Spawn a comet when the boss attacks."""
+        # You can adjust the path to the comet animation folder here
+        comet = Comet(player_x + 50, "assets/boss/comet", scale=2)
+        comet_group.add(comet)
 
     def take_damage(self, amount):
-        """Reduce health when the boss takes damage."""
-        if not self.is_dead:
-            self.health -= amount
-            if self.health <= 0:
-                self.is_dead = True  # Set flag to initiate death sequence
-                self.current_animation = "death"  # Switch to death animation
-                self.animation_index = 0  # Start death animation from the first frame
+        self.health -= amount
+        if self.health <= 0:
+            self.current_animation = "death"
+            self.animation_index = 0
+            self.dead = True
+
+    def draw(self, window):
+        window.blit(self.image, self.rect)

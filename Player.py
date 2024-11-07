@@ -21,11 +21,11 @@ class Player(pygame.sprite.Sprite):
 
         # Load animations
         self.animations = {
-            "idle": self.load_animation('proglang proj/assets/wizard/idle'),
-            "run": self.load_animation('proglang proj/assets/wizard/run'),
-            "jump": self.load_animation('proglang proj/assets/wizard/jump'),
-            "attack2": self.load_animation('proglang proj/assets/wizard/attack2'),
-            "death": self.load_animation('proglang proj/assets/wizard/death')
+            "idle": self.load_animation('assets/wizard/idle'),
+            "run": self.load_animation('assets/wizard/run'),
+            "jump": self.load_animation('assets/wizard/jump'),
+            "attack2": self.load_animation('assets/wizard/attack2'),
+            "death": self.load_animation('assets/wizard/death')
         }
 
         # Set initial animation
@@ -108,6 +108,8 @@ class Player(pygame.sprite.Sprite):
 
         # Flip the frame if the player is facing left
         self.image = pygame.transform.flip(frame, True, False) if not self.facing_right else frame
+        
+        # Update rect to center the player sprite
         self.rect = self.image.get_rect(center=(self.x, self.y))
 
     def update(self):
@@ -116,8 +118,8 @@ class Player(pygame.sprite.Sprite):
         self.update_animation()  # Update the animation frame regardless of input
 
         # Prevent the player from falling below the ground level (e.g., 500 is the ground level)
-        if self.y >= 700:
-            self.y = 700  # Reset position to ground level
+        if self.y >= 790:
+            self.y = 790  # Reset position to ground level
             self.is_jumping = False
             self.jumpCount = 10  # Reset jump count
 
@@ -127,9 +129,19 @@ class Player(pygame.sprite.Sprite):
         self.animation_index = 0  # Reset animation to start from the first frame
         
         # Pass path to the projectile's animation frames
-        projectile_path = 'proglang proj/assets/projectile'  # Example path for your projectile animation frames
-        return Projectile(self.x+100, self.y+100, mouse_x, mouse_y, projectile_path)
+        projectile_path = 'assets/projectile'  # Example path for your projectile animation frames
+        return Projectile(self.x, self.y, mouse_x, mouse_y, projectile_path)
     
     def draw(self, window):
-        """Draw the player on the game window."""
-        window.blit(self.image, (self.x, self.y))
+        """Draw the player on the game window and show the rectangle."""
+        # Draw the player sprite using rect to ensure it's centered
+        window.blit(self.image, self.rect.topleft)  # Draw the image at the top-left of the rect
+
+        # Optional: Draw the rectangle around the player for visualization
+        # Reduce the size of the rectangle by half (you can change the factor as needed)
+        reduced_width = self.rect.width // 3.5
+        reduced_height = self.rect.height // 2
+        reduced_rect = pygame.Rect(self.rect.centerx - reduced_width // 2, self.rect.centery - reduced_height // 2, reduced_width, reduced_height)
+
+        pygame.draw.rect(window, (255, 0, 0), reduced_rect, 2)  # Red rectangle with a 2-pixel border
+
