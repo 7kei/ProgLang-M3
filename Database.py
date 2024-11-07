@@ -40,3 +40,4 @@ class Database:
                             (name, killCount, timeSpent))
         self.conn.commit()
     
+
