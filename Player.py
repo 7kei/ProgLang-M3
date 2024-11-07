@@ -4,11 +4,12 @@ from Enemy import *
 from Question import *
 
 class Player:
-    def __init__(self, x, y, maxHealth):
+    def __init__(self, x, y, maxHealth, window):
         self.maxHealth = maxHealth
         self.x = x
         self.y = y
         self.currentHealth = maxHealth
+        self.window = window
 
         self.hitbox = Rect(0,0,120,120)
         self.hitbox.center = x,y
@@ -31,6 +32,7 @@ class Player:
                         curQues = questionList[i]
                         if curQues.checkAnswer(self.inputText):
                             questionList.remove(curQues)
+                            self.heal(100)
                     self.inputText = ''
 
                 elif event.key == pygame.K_BACKSPACE:
@@ -46,9 +48,11 @@ class Player:
         # Player Hitbox
         pygame.draw.rect(window, (255,0,0), self.hitbox, 5)
 
-        # Health Bar
-        pygame.draw.rect(window, (255,0,0), Rect(self.x-self.maxHealth*0.1//2, self.y+120, self.maxHealth*0.1, 20))
-        pygame.draw.rect(window, (0,255,0), Rect(self.x-self.maxHealth*0.1//2, self.y+120, self.currentHealth*0.1, 20))
+        # Health Bar - Red Background
+        pygame.draw.rect(window, (255,0,0), Rect(self.x - self.maxHealth * 0.1 // 2, self.y + 120, self.maxHealth * 0.1, 20))
+    
+        # Health Bar - Green (based on current health)
+        pygame.draw.rect(window, (0,255,0), Rect(self.x - self.maxHealth * 0.1 // 2, self.y + 120, self.currentHealth * 0.1, 20))
 
         # Input Rectangle
         pygame.draw.rect(window, (255,255,255), self.inputBox)
@@ -70,4 +74,5 @@ class Player:
             return
         if self.currentHealth + amt >= self.maxHealth:
             self.currentHealth = self.maxHealth
-        self.currentHealth += amt
+            self.currentHealth += amt
+            self.currentHealth = min(self.currentHealth + amt, self.maxHealth)
