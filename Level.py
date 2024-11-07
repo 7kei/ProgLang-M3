@@ -3,14 +3,16 @@ from Player import *
 from Enemy import *
 from Question import *
 from GameState import *
+from Database import *
 
 BLUE = (106, 159, 181)
 WHITE = (255, 255, 255)
 
 class Level:
-    def __init__(self, window):
+    def __init__(self, window, database: Database):
         self.window = window
         self.player = Player(800//2, 600//2, 1000)
+        self.databaseConnection = database
         self.questions: list[Question] = []
         self.enemyList : list[Enemy] = []
         self.bullets : list[Bullet] = []
@@ -18,7 +20,9 @@ class Level:
         self.initEnemies()
     
     def initQuestions(self):
-        self.questions.append(Question('What is 1+1?', '2'))
+        curQues = self.databaseConnection.getQuestions()
+        for i in curQues:
+            self.questions.append(Question(i[0], i[1]))
 
     def initEnemies(self):
         num_enemies = 8
