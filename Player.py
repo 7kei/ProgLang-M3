@@ -1,11 +1,13 @@
 import pygame
 import os
+
+from pygame import Rect
 from Projectile import *
+from HealthBar import *
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, max_health=100):
         super().__init__()
-
         # Position and physics properties
         self.x = x
         self.y = y
@@ -18,14 +20,17 @@ class Player(pygame.sprite.Sprite):
         # Health attributes
         self.max_health = max_health
         self.current_health = max_health
+        self.hitbox = pygame.Rect(x, y, 100, 50)
+        self.hitbox.center = (x, y)
+        self.healthBar = HealthBar(max_health, max_health, (self.x - max_health * 0.1 // 2, self.y + 120), (200, 20))
 
         # Load animations
         self.animations = {
-            "idle": self.load_animation('proglang proj/assets/wizard/idle'),
-            "run": self.load_animation('proglang proj/assets/wizard/run'),
-            "jump": self.load_animation('proglang proj/assets/wizard/jump'),
-            "attack2": self.load_animation('proglang proj/assets/wizard/attack2'),
-            "death": self.load_animation('proglang proj/assets/wizard/death')
+            "idle": self.load_animation('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/wizard/idle'),
+            "run": self.load_animation('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/wizard/run'),
+            "jump": self.load_animation('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/wizard/jump'),
+            "attack2": self.load_animation('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/wizard/attack2'),
+            "death": self.load_animation('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/wizard/death')
         }
 
         # Set initial animation
@@ -120,6 +125,13 @@ class Player(pygame.sprite.Sprite):
             self.y = 700  # Reset position to ground level
             self.is_jumping = False
             self.jumpCount = 10  # Reset jump count
+            
+        # Update hitbox position to match player position
+        self.hitbox.center = (self.x, self.y)
+
+        # Update health bar position to stay below the player hitbox
+        health_bar_offset_y = 20  # Adjust this value to place the health bar correctly
+        self.healthBar.update_position((self.hitbox.centerx - self.max_health * 0.1 // 2, self.hitbox.bottom + health_bar_offset_y))
 
     def handle_attack(self, mouse_x, mouse_y):
         """Handle player attack animation and create projectiles."""
@@ -127,9 +139,30 @@ class Player(pygame.sprite.Sprite):
         self.animation_index = 0  # Reset animation to start from the first frame
         
         # Pass path to the projectile's animation frames
-        projectile_path = 'proglang proj/assets/projectile'  # Example path for your projectile animation frames
+        projectile_path = f'D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/projectile'  # Example path for your projectile animation frames
         return Projectile(self.x+100, self.y+100, mouse_x, mouse_y, projectile_path)
+    
+    def take_damage(self, amount):
+        self.currentHealth -= amount
+        self.healthBar.damage(amount)
+
+    def heal(self, amount):
+        self.currentHealth += amount
+        self.healthBar.heal(amount)
     
     def draw(self, window):
         """Draw the player on the game window."""
         window.blit(self.image, (self.x, self.y))
+        
+        # Player Hitbox
+        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 5)
+
+        # Health Bar
+        self.healthBar.draw(window)
+
+        # # Input Rectangle
+        # pygame.draw.rect(window, (255, 255, 255), self.inputBox)
+
+        # # Input Text
+        # inputBoxTextSurface = pygame.font.SysFont('Arial', 12).render(self.inputText, True, pygame.Color(0, 0, 0))
+        # window.blit(inputBoxTextSurface, (self.inputBox.x, self.inputBox.y))

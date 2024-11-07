@@ -11,7 +11,7 @@ class Comet(pygame.sprite.Sprite):
         self.speed = 5
 
         # Load comet animation frames
-        self.frames = self.load_animation_frames('proglang proj/assets/boss/comet')
+        self.frames = self.load_animation_frames(f'proglang proj/assets/boss/comet')
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
         self.rect = self.image.get_rect(center=(self.x, self.y))
