@@ -19,6 +19,9 @@ class Level:
     
     def initQuestions(self):
         self.questions.append(Question('What is 1+1?', '2'))
+        self.questions.append(Question('What is my name ', 'anya'))
+        self.questions.append(Question('imong mama?', 'tsinelas'))
+
 
     def initEnemies(self):
         num_enemies = 8
