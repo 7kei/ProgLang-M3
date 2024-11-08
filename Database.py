@@ -18,11 +18,11 @@ class Database:
         self.cursor.execute("CREATE TABLE IF NOT EXISTS leaderboard (player_name TEXT, kill_count INTEGER, time_spent INTEGER)")
         self.conn.commit()
         print("Database initialized!")
-    
+
     def getQuestions(self):
         rows = self.cursor.execute("SELECT * FROM questions").fetchall()
         return rows
-    
+
     def insertIntoQuestions(self, question: str, answer: str):
         currentQuestions = [i[0] for i in self.getQuestions()]
         if question in currentQuestions:
@@ -30,13 +30,16 @@ class Database:
         self.cursor.execute("INSERT INTO questions VALUES (?, ?)",
                             (str(question), str(answer)))
         self.conn.commit()
-    
+
     def getLeaderboard(self):
         rows = self.cursor.execute("SELECT * FROM leaderboard").fetchall()
         return rows
-    
+
     def insertIntoLeaderboard(self, name: str, killCount: int, timeSpent: int):
         self.cursor.execute("INSERT INTO leaderboard VALUES (?, ?, ?)",
                             (name, killCount, timeSpent))
         self.conn.commit()
-    
+
+    # New save_player method
+    def save_player(self, player_name: str, kills: int, time_spent: int):
+        self.insertIntoLeaderboard(player_name, kills, time_spent)

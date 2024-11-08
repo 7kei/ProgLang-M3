@@ -14,10 +14,6 @@ def main():
     database.insertIntoQuestions("Is orange a fruit?", "yes")
 
     # Template leaderboard
-    database.insertIntoLeaderboard("Test_Keian1", 10, 5)
-    database.insertIntoLeaderboard("Test_Keian2", 11, 4)
-    database.insertIntoLeaderboard("Test_Keian3", 12, 3)
-    database.insertIntoLeaderboard("Test_Keian4", 13, 2)
 
 if __name__ == "__main__":
     main()
