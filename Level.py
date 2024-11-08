@@ -51,22 +51,23 @@ class Level:
         
         # Check for projectile and enemy collisions
         for projectile in self.projectiles:
-            hit_enemies = pygame.sprite.spritecollide(projectile, self.enemies, True)  # Remove enemies on collision
+            hit_enemies = pygame.sprite.spritecollide(projectile, self.enemies, False)  # enemies on collision
             if hit_enemies:
+                for enemy in hit_enemies:
+                    enemy.die()
                 projectile.kill()  # Remove the projectile on collision
                 self.kill_count += len(hit_enemies)  # Increment kill count for each enemy hit
         
         # Check for player and enemy collisions
-    # Check for player and enemy collisions
         for enemy in self.enemies:
             if self.player.rect.colliderect(enemy.rect):  # Use player rect for collision check
                 self.player.is_hit = True  # Trigger hit animation for player
                 self.player.current_health -= 10  # Example: Decrease health on collision with enemy
                 
                 # Apply knockback effect based on the enemy position
-                self.player.apply_knockback(enemy.x, enemy.y)  # Apply knockback based on enemy position
+                self.player.apply_knockback(enemy.x, enemy.y, 2)  # Apply knockback based on enemy position
 
-                self.enemies.remove(enemy)  # Remove the enemy from the game
+                enemy.die()
                 break  # Break after first collision to avoid checking further enemies
 
         # Check for player and comet collisions
@@ -76,7 +77,28 @@ class Level:
                 self.player.current_health -= 15  # Example: Decrease health on collision with comet
                 
                 # Apply knockback effect based on the comet position
-                self.player.apply_knockback(comet.x, comet.y)  # Apply knockback based on comet position
+                self.player.apply_knockback(comet.x, comet.y, 10)  # Apply knockback based on comet position
+        
+        # Check for projectile and comet collisions
+        for projectile in self.projectiles:
+            hit_comets = pygame.sprite.spritecollide(projectile, self.comets, False)  # Check if projectile hits a comet
+            if hit_comets:
+                
+                for comet in hit_comets:
+                    comet.state = "explosion"  # Change comet state to explosion
+                    comet.animation_index = 0  # Reset the animation frame to start the explosion
+                    comet.image_rect.center = (comet.x, comet.y)  # Ensure explosion is centered on comet's position
+                projectile.kill()  # Remove the projectile after it hits a comet
+
+        # """Check for comet-projectile collisions and trigger deflection."""
+        # for comet in self.comets:
+        #     for projectile in self.projectiles:
+        #         if comet.rect.colliderect(projectile.rect):  # If comet and projectile collide
+        #             # Pass comet and boss coordinates to deflect function
+        #             self.player.deflect(comet, self.boss.rect.x, self.boss.rect.y)  
+        #             comet.state = "explosion"  # Comet triggers explosion after collision
+        #             comet.animation_index = 0  # Reset comet animation for explosion
+        #             break  # Break to avoid multiple deflects on the same projectile
 
     def redraw_game_window(self):
         """Redraw the entire game window."""
@@ -107,12 +129,12 @@ class Level:
         # Draw all comets
         for comet in self.comets:
             comet.draw(self.window)
-        self.comets.draw(self.window)  # Draw the comets on the screen
+        # self.comets.draw(self.window)  # Draw the comets on the screen
 
         # Draw all enemies
         for enemy in self.enemies:
             enemy.draw(self.window)
-        self.enemies.draw(self.window)
+        # self.enemies.draw(self.window)
 
         # Update display
         pygame.display.flip()  # Update the screen with everything drawn

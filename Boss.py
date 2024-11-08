@@ -87,7 +87,7 @@ class Boss(pygame.sprite.Sprite):
     def spawn_comet(self, player_x, comet_group):
         """Spawn a comet when the boss attacks."""
         # You can adjust the path to the comet animation folder here
-        comet = Comet(player_x + 50, "assets/boss/comet", scale=2)
+        comet = Comet(player_x + 50, "assets/boss/comet/fall", "assets/boss/comet/explosion",scale=2)
         comet_group.add(comet)
 
     def take_damage(self, amount):
