@@ -18,12 +18,7 @@ class Level:
         self.initEnemies()
         self.player_answer = ""
         self.enemy_group = pygame.sprite.Group()
-        self.player_group = pygame.sprite.GroupSingle()  # Use Single for the player as it's only one
-        
-        # Ensure player is centered at the start
-        # screen_width, screen_height = self.window.get_size()
-        # self.player.x, self.player.y = screen_width // 2, screen_height // 2
-
+        self.player_group = pygame.sprite.GroupSingle()  
         
     def initQuestions(self):
         self.questions_dict = {
