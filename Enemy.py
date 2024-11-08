@@ -23,7 +23,7 @@ class Bullet:
 class Enemy:
     # Load animation frames for all enemies
     try: 
-        animation = [pygame.image.load(f"C:\\Users\\ANYA\\ProgLang\\ProgLang-M3\\Sprites (assets)\\bat\\fly ({i}).png") for i in range(1, 4)]
+        animation = [pygame.image.load(f"Sprites (assets)/bat/fly ({i}).png") for i in range(1, 4)]
     except pygame.error as e:
         print("Error loading animation frames:", e)
         animation = []  # Fallback to empty if loading fails

@@ -3,14 +3,16 @@ from Player import *
 from Enemy import *
 from Question import *
 from GameState import *
+from Database import *
 
 BLUE = (106, 159, 181)
 WHITE = (255, 255, 255)
 
 class Level:
-    def __init__(self, window):
+    def __init__(self, window, database: Database):
         self.window = window
         self.player = Player(800 // 2, 600 // 2, 1000, window)
+        self.databaseConnection = database
         self.questions_dict = {}
         self.enemyList = []
         self.bullets = []
@@ -21,16 +23,9 @@ class Level:
         self.player_group = pygame.sprite.GroupSingle()  
         
     def initQuestions(self):
-        self.questions_dict = {
-            "What is 3+4?": "7",
-            "What is 5*2?": "10",
-            "What is 9-3?": "6",
-            "What is 8/2?": "4",
-            "What is 1+1?": "2",
-            "Color of an apple?" : "red",
-            "Color of the sea?" : "blue",
-            "Is orange a fruit?" : "yes",
-        }
+        curQues = self.databaseConnection.getQuestions()
+        for i in curQues:
+            self.questions_dict[i[0]] = i[1]
 
     def initEnemies(self):
         num_enemies = 8
