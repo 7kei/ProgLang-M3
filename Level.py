@@ -122,20 +122,19 @@ class Level:
         pygame.display.flip()  # Update the screen with everything drawn
 
     def mainloop(self, event_list):
-        current_screen = "MAIN_MENU"  # Start with the main menu screen
-        play_level_screen = Level(window)  # Initialize the play level
-        main_menu_screen = MainMenu(window)  # Initialize the main menu
-        
+
         # Event Handling
         for event in event_list:
             if event.type == pygame.QUIT: # Check if player quits
                 return GameState.QUIT
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left-click
-                    mouse_x, mouse_y = pygame.mouse.get_pos()
-                    projectile = self.player.handle_attack(mouse_x, mouse_y)
-                    if projectile is not None:
-                        self.projectiles.add(projectile)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:  # Item 1 - Negative Projectile
+                        new_projectile = Projectile(player.x, player.y, target_x, target_y, 'assets/projectile_negative', 1)
+                        self.projectiles.add(new_projectile)
+                    elif event.key == pygame.K_2:  # Item 2 - Positive Projectile
+                        new_projectile = Projectile(player.x, player.y, target_x, target_y, 'assets/projectile_positive', 2)
+                        self.projectiles.add(new_projectile)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
                     self.selected_item = 'item1'

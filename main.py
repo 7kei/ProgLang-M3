@@ -1,6 +1,5 @@
 import pygame
 import pygame.freetype
-import random
 import time
 
 from pygame.sprite import *

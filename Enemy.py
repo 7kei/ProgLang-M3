@@ -97,17 +97,17 @@ class Enemy(pygame.sprite.Sprite):
         )
         pygame.draw.rect(window, (255, 0, 0), reduced_rect, 1)  # Red rectangle with 1-pixel border
 
-    def shoot(self, bullet_list):
-        """Create a new bullet aimed at the player."""
-        current_time = pygame.time.get_ticks() / 1000.0
+    # def shoot(self, bullet_list):
+    #     """Create a new bullet aimed at the player."""
+    #     current_time = pygame.time.get_ticks() / 1000.0
         
-        if current_time - self.last_fired >= 0.5:  # Shoot every 0.5 seconds
-            if self.window:  # Check if window reference exists
-                target_x, target_y = self.window.get_rect().center
-                dx, dy = target_x - self.x, target_y - self.y
-                distance = math.sqrt(dx ** 2 + dy ** 2)
-                direction = (dx / distance, dy / distance)
+    #     if current_time - self.last_fired >= 0.5:  # Shoot every 0.5 seconds
+    #         if self.window:  # Check if window reference exists
+    #             target_x, target_y = self.window.get_rect().center
+    #             dx, dy = target_x - self.x, target_y - self.y
+    #             distance = math.sqrt(dx ** 2 + dy ** 2)
+    #             direction = (dx / distance, dy / distance)
                 
-                # Create new bullet (implementation depends on your Bullet class)
-                bullet_list.append(Bullet([self.x, self.y], direction, self.dmg_amt))
-                self.last_fired = current_time
+    #             # Create new bullet (implementation depends on your Bullet class)
+    #             bullet_list.append(Bullet([self.x, self.y], direction, self.dmg_amt))
+    #             self.last_fired = current_time

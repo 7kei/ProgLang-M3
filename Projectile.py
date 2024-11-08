@@ -5,7 +5,7 @@ import os
 from Player import *
 
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, x, y, target_x, target_y, path_to_frames):
+    def __init__(self, x, y, target_x, target_y, path_to_frames, projectile_type):
         super().__init__()
 
         # Initial position of the projectile (where it is fired from)
@@ -39,6 +39,7 @@ class Projectile(pygame.sprite.Sprite):
         return [pygame.image.load(os.path.join(path, img)) for img in sorted(os.listdir(path))]
 
     def update(self):
+        """Update the projectile's position and check for collision with enemies."""
         # Check if the delay time has passed
         if pygame.time.get_ticks() - self.start_time >= self.delay_time:
             if not self.started:
@@ -65,6 +66,15 @@ class Projectile(pygame.sprite.Sprite):
             
             # Recalculate the position of the rect so the rotation happens around the base of the projectile
             self.rect = self.image.get_rect(center=(self.x, self.y))  # Reset the rect to keep the projectile's position
+            
+            # Collision detection with enemies
+            for enemy in enemies_group:
+                if self.rect.colliderect(enemy.rect):
+                    # Check if the projectile type matches the enemy type
+                    if (self.projectile_type == 1 and enemy.enemy_type == 0) or \
+                       (self.projectile_type == 2 and enemy.enemy_type == 1):
+                        enemy.kill()  # Destroy the enemy
+                        self.kill()   # Destroy the projectile
 
             # Add boundary checking (e.g., remove projectile if out of bounds)
             if self.x < 0 or self.x > 1500 or self.y < 0 or self.y > 900:  # Assuming the screen is 1500x900
