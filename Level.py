@@ -26,6 +26,15 @@ class Level:
         
         # Group for projectiles
         self.projectiles = Group()
+
+        # Group for comets
+        self.comets = pygame.sprite.Group()  
+
+        # Group for enemies
+        self.enemies = Group()
+
+        # Timer to track enemy spawn intervals
+        self.last_enemy_spawn_time = pygame.time.get_ticks()
         
         # Load item images and set up positions
         self.items = {
@@ -71,7 +80,7 @@ class Level:
         self.window.blit(Level.bg, (-100, -150))  # Draw the background
         
         # Example timer and score rendering (use your own game variables)
-        timer = f'Timer: {pygame.time.get_ticks() // 1000} secs'  # Assuming time in seconds
+        timer = f'Timer: {pygame.time.get_ticks() // 1000} secs'  # To get time in seconds
         score = f'Kills: {self.kill_count} eigenbats killed'
         
         FONT_timer = pygame.font.SysFont("Sans", 20)
@@ -112,51 +121,44 @@ class Level:
         # Update display
         pygame.display.flip()  # Update the screen with everything drawn
 
-    def mainloop(self):
+    def mainloop(self, event_list):
+        current_screen = "MAIN_MENU"  # Start with the main menu screen
+        play_level_screen = Level(window)  # Initialize the play level
+        main_menu_screen = MainMenu(window)  # Initialize the main menu
+        
         # Event Handling
-        event_list = pygame.event.get()
         for event in event_list:
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT: # Check if player quits
                 return GameState.QUIT
             elif event.type == pygame.MOUSEBUTTONDOWN:
-
                 if event.button == 1:  # Left-click
                     mouse_x, mouse_y = pygame.mouse.get_pos()
                     projectile = self.player.handle_attack(mouse_x, mouse_y)
-                    self.projectiles.add(projectile)
+                    if projectile is not None:
+                        self.projectiles.add(projectile)
             elif event.type == pygame.KEYDOWN:
-                # Toggle item based on key press
                 if event.key == pygame.K_1:
                     self.selected_item = 'item1'
                 elif event.key == pygame.K_2:
                     self.selected_item = 'item2'
                 elif event.key == pygame.K_3:
                     self.selected_item = 'item3'
-                else:
-                    self.selected_item = None  # Reset if other keys are pressed
-                
+                    
         # Handle player input events
         self.player.handle_input()
 
         # Update game elements
-        self.player.update()  # Update player animation and position
-        self.projectiles.update()  # Update projectiles (movement, collision checks, etc.)
+        self.player.update()
+        self.projectiles.update()
 
-        # Boss update, passing the shared level_time and player position
+        # Boss and enemy updates
         self.boss.update(self.level_time, self.comets, self.player.x)
-
-        # Update comets
-        self.comets.update()  # Update comet positions and animations
-        
-
-        # Spawn and update enemies
-        self.spawn_enemy()  # Spawn new enemies every 2 seconds
-        self.enemies.update()  # Update enemy movement and animations
+        self.spawn_enemy()
+        self.enemies.update()
+        self.comets.update()
 
         # Redraw everything
-        self.redraw_game_window()  # Call the redraw function
-        
-        # Control the frame rate (FPS) to ensure smooth animation
-        self.clock.tick(60)  # 60 FPS, adjust if needed
+        self.redraw_game_window()
+        self.clock.tick(60)
 
         return GameState.NEWGAME

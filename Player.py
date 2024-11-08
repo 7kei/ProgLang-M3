@@ -141,7 +141,7 @@ class Player(pygame.sprite.Sprite):
         self.animation_index = 0  # Reset animation to start from the first frame
         
         # Pass path to the projectile's animation frames
-        projectile_path = f'D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/projectile'  # Example path for your projectile animation frames
+        projectile_path = f'assets/projectile'
         return Projectile(self.rect.centerx, self.rect.centery, mouse_x, mouse_y, projectile_path)
     
     def take_damage(self, amount):

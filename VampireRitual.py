@@ -1,5 +1,7 @@
 import pygame
 
+from Question import question
+
 class VampireRitual:
     try:
         animation = [pygame.image.load(f'Sprites/bat/fly ({i}).png') for i in range(1, 4)]
