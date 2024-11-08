@@ -19,21 +19,12 @@ fount = "New folder/JainiPurva-Regular.ttf"
 player_name = ""
 
 
-def create_surface_with_text(text, font_size, text_rgb, bg_rgb=None):
-    font = pygame.font.Font(fount, font_size)
-
-    if bg_rgb is None:
-        surface = font.render(text, True, text_rgb, None)
-    else:
-        surface = font.render(text, True, text_rgb, bg_rgb)
-
-    return surface.convert_alpha()
 
 class UIElement(Sprite):
-    def __init__(self, center_position, text, font_size, bg_rgb, text_rgb, action=None):
+    def __init__(self, center_position, text, font_size, bg_rgb, text_rgb, action=None, ):
         self.mouse_over = False
         default_image = create_surface_with_text(text, font_size, text_rgb, bg_rgb)
-        highlighted_image = create_surface_with_text(text, int(font_size * 1.2), text_rgb, bg_rgb)
+        highlighted_image = create_surface_with_text(text, int(font_size * 1.2), RED, bg_rgb)
         self.images = [default_image, highlighted_image]
         self.rects = [default_image.get_rect(center=center_position),
                       highlighted_image.get_rect(center=center_position)]
@@ -58,6 +49,17 @@ class UIElement(Sprite):
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+
+
+def create_surface_with_text(text, font_size, text_rgb, bg_rgb=None):
+    font = pygame.font.Font(fount, font_size)
+
+    if bg_rgb is None:
+        surface = font.render(text, True, text_rgb, None)
+    else:
+        surface = font.render(text, True, text_rgb, bg_rgb)
+
+    return surface.convert_alpha()
 
 def confirm_quit(screen):
 
@@ -251,51 +253,61 @@ def loading_screen(screen):
         pygame.display.flip()
         clock.tick(30)
 
+
+
 def leaderboard(screen, database: Database):
     background = pygame.image.load("New folder/mainbackground.png")
     screen.blit(background, (0, 0)) 
-    start_btn = UIElement((110, 70), "MAIN MENU", 30, None,WHITE, action=GameState.TITLE)
-    quit_btn = UIElement((690, 70), "QUIT GAME", 30, None, WHITE, action=GameState.QUIT)
+    start_btn = UIElement((110, 70), "MAIN MENU", 20, None, WHITE, action=GameState.TITLE)
+    quit_btn = UIElement((690, 70), "QUIT GAME", 20, None, WHITE, action=GameState.QUIT)
     buttons = [start_btn, quit_btn]
 
-    subtitle_font = pygame.font.Font(fount,30)  # Larger font for title
+    subtitle_font = pygame.font.Font(fount, 30)
     subtitle1_text = subtitle_font.render("PLAYER", True, WHITE)
-    subtitle1_rect = subtitle1_text.get_rect(center=(110,200))  
+    subtitle1_rect = subtitle1_text.get_rect(center=(110, 150))
     subtitle2_text = subtitle_font.render("HITS", True, WHITE)
-    subtitle2_rect = subtitle2_text.get_rect(center=(400,200))
+    subtitle2_rect = subtitle2_text.get_rect(center=(400, 150))
     subtitle3_text = subtitle_font.render("SECONDS", True, WHITE)
-    subtitle3_rect = subtitle3_text.get_rect(center=(690,200))
+    subtitle3_rect = subtitle3_text.get_rect(center=(690, 150))
 
     game_state = GameState.LEADERBOARD
 
     to_blit = []
 
-    title1_font = pygame.font.Font(fount,60)  # Larger font for title
+    title1_font = pygame.font.Font(fount, 60)
     title1_text = title1_font.render("LEADERBOARD", True, WHITE)
-    title1_rect = title1_text.get_rect(center=(400,150))
+    title1_rect = title1_text.get_rect(center=(400, 70))
     to_blit.append((title1_text, title1_rect))
 
     leaderboard = database.getLeaderboard()
     sortByKill = sorted(leaderboard, key=lambda tup: tup[1], reverse=True)
 
-    counter = 0
-    for i in sortByKill:
-        name_font = pygame.font.Font(fount,30)
-        name_text = name_font.render(i[0], True, WHITE)
-        name_rect = name_text.get_rect(center=(110,250 + (50 * counter)))
-        to_blit.append((name_text, name_rect))
+    # Define scrolling parameters
+    scroll_offset = 0
+    max_display_count = 10  # Number of rows to display at a time
+    row_height = 50
+    max_scroll_offset = max(0, (len(sortByKill) - max_display_count) * row_height)
 
-        kill_font = pygame.font.Font(fount,30)
-        kill_text = kill_font.render(str(i[1]), True, RED)
-        kill_rect = kill_text.get_rect(center=(400,250 + (50 * counter)))
-        to_blit.append((kill_text, kill_rect))
+    def render_rows(offset):
+        rendered = []
+        for idx, entry in enumerate(sortByKill):
+            y_position = 200 + (idx * row_height) - offset
+            if 200 <= y_position <= screen.get_height():
+                name_font = pygame.font.Font(fount, 30)
+                name_text = name_font.render(entry[0], True, WHITE)
+                name_rect = name_text.get_rect(center=(110, y_position))
+                rendered.append((name_text, name_rect))
 
-        time_font = pygame.font.Font(fount,20)
-        time_text = time_font.render(str(i[2]), True, WHITE)
-        time_rect = time_text.get_rect(center=(690,250 + (50 * counter)))
-        to_blit.append((time_text, time_rect))
+                kill_font = pygame.font.Font(fount, 30)
+                kill_text = kill_font.render(str(entry[1]), True, RED)
+                kill_rect = kill_text.get_rect(center=(400, y_position))
+                rendered.append((kill_text, kill_rect))
 
-        counter += 1
+                time_font = pygame.font.Font(fount, 20)
+                time_text = time_font.render(str(entry[2]), True, WHITE)
+                time_rect = time_text.get_rect(center=(690, y_position))
+                rendered.append((time_text, time_rect))
+        return rendered
 
     while True:
         mouse_up = False
@@ -305,13 +317,19 @@ def leaderboard(screen, database: Database):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 mouse_up = True
+            if event.type == pygame.MOUSEWHEEL:
+                scroll_offset = min(max(scroll_offset - event.y * row_height, 0), max_scroll_offset)
 
+        # Render background and subtitles
         screen.blit(background, (0, 0))
+        screen.blit(title1_text, title1_rect)
         screen.blit(subtitle1_text, subtitle1_rect)
         screen.blit(subtitle2_text, subtitle2_rect)
         screen.blit(subtitle3_text, subtitle3_rect)
 
-        for surface, rect in to_blit:
+      
+        rows_to_blit = render_rows(scroll_offset)
+        for surface, rect in rows_to_blit:
             screen.blit(surface, rect)
 
         for button in buttons:
@@ -321,6 +339,7 @@ def leaderboard(screen, database: Database):
             button.draw(screen)
 
         pygame.display.flip()
+
 
 def story_screen(screen, player_name):
 
@@ -415,9 +434,8 @@ def story_screen(screen, player_name):
             return GameState.TITLE 
 
 def get_player_name_from_database():
-
     return "John Doe" 
-#
+
 player_name = get_player_name_from_database()
 
 def finish_level(screen):
@@ -433,9 +451,33 @@ def finish_level(screen):
     leaderboard_btn = UIElement((400, 450), "LEADERBOARD", 30, None, WHITE, action=GameState.LEADERBOARD)
     buttons = [start_btn, quit_btn, leaderboard_btn,return_btn]
 
+    animation = [pygame.image.load(f"New folder/chesterhappy ({i}).png") for i in range(1,4)]
+    clock = pygame.time.Clock()
+
+    frame = 0
+    frame_delay = 10
+    delay_counter = 0
+    clock = pygame.time.Clock()
+    start_time = time.time()
+
 
     while True:
-        mouse_up = False  # Reset mouse_up at the beginning of each frame
+        mouse_up = False 
+        elapsed_time = time.time() - start_time
+
+        delay_counter += 1
+        if delay_counter >= frame_delay:
+            frame = (frame + 1) % len(animation)
+            delay_counter = 1
+        if elapsed_time >= 7:
+            return
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return GameState.QUIT
+            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                mouse_up = True
+        
+        screen.blit(animation[frame], (0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 if confirm_quit(screen):
