@@ -44,6 +44,10 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(self.x, self.y))  # Hitbox for collision detection
         self.image_rect = self.rect.copy()  # Separate rect for the image (visual transformation)
 
+        # Resize the rect (e.g., to shrink the player's hitbox during attack)
+        self.rect.width = self.image_rect.width // 7  # Adjust width (e.g., reduce width by 4)
+        self.rect.height = self.image_rect.height // 4  # Adjust height (e.g., reduce height by 3)
+
         # Flags to track animation states
         self.in_attack_animation = False
         self.projectiles = projectiles
@@ -121,9 +125,9 @@ class Player(pygame.sprite.Sprite):
                 self.animation_index = 0
 
             # Flip the hit animation based on knockback direction
-            if self.knockback_direction == 1:
+            if self.knockback_direction > 1:
                 self.facing_right = False  # Flip the direction for knockback to the right
-            elif self.knockback_direction == -1:
+            elif self.knockback_direction < -1:
                 self.facing_right = True  # Flip the direction for knockback to the left
 
             frame = self.animations[self.current_animation][int(self.animation_index)]
@@ -172,7 +176,7 @@ class Player(pygame.sprite.Sprite):
         """Update player position and animation."""
         if self.is_knocked_back:
             # Apply knockback
-            self.x += 5 * self.knockback_direction  # Move the player slightly based on knockback direction
+            self.x += self.knockback_direction  # Move the player slightly based on knockback direction
             self.knockback_timer -= 1  # Decrease the knockback duration timer
 
             if self.knockback_timer <= 0:
@@ -258,14 +262,14 @@ class Player(pygame.sprite.Sprite):
             self.currentHealth += amt
             self.currentHealth = min(self.currentHealth + amt, self.maxHealth)
 
-    def apply_knockback(self, enemy_x, enemy_y):
+    def apply_knockback(self, enemy_x, enemy_y, knockback_strength):
         """Apply knockback based on the position of the enemy."""
         if enemy_x < self.x:
             # Enemy is to the left, apply knockback to the right
-            self.knockback_direction = 1
+            self.knockback_direction = 1 * knockback_strength
         else:
             # Enemy is to the right, apply knockback to the left
-            self.knockback_direction = -1
+            self.knockback_direction = -1 * knockback_strength
         
         self.is_knocked_back = True  # Trigger knockback state
         self.knockback_timer = 25  # Duration of knockback in frames (adjust as needed)

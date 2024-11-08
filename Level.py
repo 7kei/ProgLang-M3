@@ -78,6 +78,12 @@ class Level:
             enemy = Enemy(self.player)  # Create a new enemy targeting the player
             self.enemies.add(enemy)
             self.last_enemy_spawn_time = current_time
+            # Add the enemy to the respective group
+            if enemy.enemy_type == 0:
+                self.enemies_positive.add(enemy)
+            else:
+                self.enemies_negative.add(enemy)
+
 
     def check_collisions(self):
         """Check for collisions between projectiles, player, enemies, and comets."""
@@ -85,21 +91,17 @@ class Level:
         # Check for projectile and enemy collisions
         for projectile in self.projectiles:
             if projectile.type == 1:  # Negative Projectile
-                hit_enemies = pygame.sprite.spritecollide(projectile, self.enemies_negative, False)  # Check for negative enemies
+                hit_enemies = pygame.sprite.spritecollide(projectile, self.enemies_positive, True)  # Check for positive enemies
             elif projectile.type == 0:  # Positive Projectile
-                hit_enemies = pygame.sprite.spritecollide(projectile, self.enemies_positive, False)  # Check for positive enemies
+                hit_enemies = pygame.sprite.spritecollide(projectile, self.enemies_negative, True)  # Check for negative enemies
             else:
                 continue
             
+            # Process collisions with the opposite type of enemies
             if hit_enemies:
                 for enemy in hit_enemies:
-                    # Check if the projectile and enemy type match
-                    if (projectile.type == 1 and isinstance(enemy, NegativeEnemy)) or \
-                    (projectile.type == 0 and isinstance(enemy, PositiveEnemy)):
-                        enemy.kill()  # Destroy enemy if matched type
-                        self.kill_count += 1
-                    else:
-                        projectile.kill()  # Only destroy the projectile if no match
+                    enemy.die()  # Destroy the enemy if it is of the opposite type
+                    self.kill_count += 1
 
                 projectile.kill()  # Always remove the projectile after collision
         
@@ -110,9 +112,9 @@ class Level:
                 self.player.current_health -= 10  # Example: Decrease health on collision with enemy
                 
                 # Apply knockback effect based on the enemy position
-                self.player.apply_knockback(enemy.x, enemy.y)  # Apply knockback based on enemy position
+                self.player.apply_knockback(enemy.x, enemy.y, 2)  # Apply knockback based on enemy position
 
-                self.enemies.remove(enemy)  # Remove the enemy from the game
+                enemy.die()
                 break  # Break after first collision to avoid checking further enemies
 
         # Check for player and comet collisions
@@ -122,7 +124,28 @@ class Level:
                 self.player.current_health -= 15  # Example: Decrease health on collision with comet
                 
                 # Apply knockback effect based on the comet position
-                self.player.apply_knockback(comet.x, comet.y)  # Apply knockback based on comet position
+                self.player.apply_knockback(comet.x, comet.y, 10)  # Apply knockback based on comet position
+        
+        # Check for projectile and comet collisions
+        for projectile in self.projectiles:
+            hit_comets = pygame.sprite.spritecollide(projectile, self.comets, False)  # Check if projectile hits a comet
+            if hit_comets:
+                
+                for comet in hit_comets:
+                    comet.state = "explosion"  # Change comet state to explosion
+                    comet.animation_index = 0  # Reset the animation frame to start the explosion
+                    comet.image_rect.center = (comet.x, comet.y)  # Ensure explosion is centered on comet's position
+                projectile.kill()  # Remove the projectile after it hits a comet
+
+        # """Check for comet-projectile collisions and trigger deflection."""
+        # for comet in self.comets:
+        #     for projectile in self.projectiles:
+        #         if comet.rect.colliderect(projectile.rect):  # If comet and projectile collide
+        #             # Pass comet and boss coordinates to deflect function
+        #             self.player.deflect(comet, self.boss.rect.x, self.boss.rect.y)  
+        #             comet.state = "explosion"  # Comet triggers explosion after collision
+        #             comet.animation_index = 0  # Reset comet animation for explosion
+        #             break  # Break to avoid multiple deflects on the same projectile
 
     def redraw_game_window(self):
         """Redraw the entire game window."""
@@ -166,12 +189,12 @@ class Level:
         # Draw all comets
         for comet in self.comets:
             comet.draw(self.window)
-        self.comets.draw(self.window)  # Draw the comets on the screen
+        # self.comets.draw(self.window)  # Draw the comets on the screen
 
         # Draw all enemies
         for enemy in self.enemies:
             enemy.draw(self.window)
-        self.enemies.draw(self.window)
+        # self.enemies.draw(self.window)
 
         # Update display
         pygame.display.flip()  # Update the screen with everything drawn
@@ -207,11 +230,11 @@ class Level:
 
             # Handling keyboard input for selecting items
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
+                if event.key == pygame.K_q:
                     self.selected_item = 'item1'  # Select Negative Projectile
-                elif event.key == pygame.K_2:
+                elif event.key == pygame.K_e:
                     self.selected_item = 'item2'  # Select Positive Projectile
-                elif event.key == pygame.K_3:
+                elif event.key == pygame.K_r:
                     self.selected_item = 'item3'  # Placeholder for other functionality
 
         # Handle player input events

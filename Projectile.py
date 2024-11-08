@@ -66,18 +66,22 @@ class Projectile(pygame.sprite.Sprite):
             self.x += self.speed * math.cos(self.angle)
             self.y += self.speed * math.sin(self.angle)
 
+            # Update the position of the hitbox (the rect)
+            self.rect.center = (self.x, self.y)
+
             # Update the animation frame based on the speed control
             self.animation_index += self.animation_speed  # Increase animation speed
+
             if self.animation_index >= len(self.frames):
                 self.animation_index = 0  # Loop animation
 
             self.image = self.frames[int(self.animation_index)]  # Get the current frame
 
             # Rotate the image so that it faces the direction from the player to the mouse
-            self.image = pygame.transform.rotate(self.frames[int(self.animation_index)], ((-1)*math.degrees(self.angle)) + 90)
-            
-            # Recalculate the position of the rect so the rotation happens around the base of the projectile
-            self.rect = self.image.get_rect(center=(self.x, self.y))  # Reset the rect to keep the projectile's position
+            self.image = pygame.transform.rotate(self.frames[int(self.animation_index)], (-1) * math.degrees(self.angle) + 90)
+
+            # Recalculate the image rect so the rotation happens around the center of the projectile
+            self.image_rect = self.image.get_rect(center=(self.x, self.y))  # Reset the image rect to keep the rotated image centered
             
             # Collision detection with the correct group based on projectile type
             if self.type == 1:  # Negative Projectile
