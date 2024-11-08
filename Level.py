@@ -1,12 +1,10 @@
 import pygame
-
 from Player import *
 from Projectile import *
 from GameState import *
 from Boss import *
 from Comet import *
 from Enemy import *
-
 from pygame.sprite import Group
 
 class Level:
@@ -20,22 +18,25 @@ class Level:
         self.clock = pygame.time.Clock()  # Initialize the clock to control FPS
         self.level_time = pygame.time.get_ticks()  # Track the level time (shared timer)
 
-
         # Instantiate the Player object
         self.player = Player(x=100, y=790, max_health=100)
         self.boss = Boss(self.level_time, x=1300, y=200, scale=2)  # Adjust coordinates for upper right placement
-        
+
         # Group for projectiles
         self.projectiles = Group()
 
         # Group for comets
-        self.comets = pygame.sprite.Group()  
+        self.comets = pygame.sprite.Group()
 
         # Group for enemies
         self.enemies = Group()
 
         # Timer to track enemy spawn intervals
         self.last_enemy_spawn_time = pygame.time.get_ticks()
+
+        # Attack cooldown logic
+        self.attack_cooldown = 500  # Cooldown in milliseconds
+        self.last_attack_time = 0  # Time of the last attack
     
     def spawn_enemy(self):
         """Spawn an enemy (bat) if enough time has passed."""
@@ -44,6 +45,38 @@ class Level:
             enemy = Enemy(self.player)  # Create a new enemy targeting the player
             self.enemies.add(enemy)
             self.last_enemy_spawn_time = current_time
+
+    def check_collisions(self):
+        """Check for collisions between projectiles, player, enemies, and comets."""
+        
+        # Check for projectile and enemy collisions
+        for projectile in self.projectiles:
+            hit_enemies = pygame.sprite.spritecollide(projectile, self.enemies, True)  # Remove enemies on collision
+            if hit_enemies:
+                projectile.kill()  # Remove the projectile on collision
+                self.kill_count += len(hit_enemies)  # Increment kill count for each enemy hit
+        
+        # Check for player and enemy collisions
+    # Check for player and enemy collisions
+        for enemy in self.enemies:
+            if self.player.rect.colliderect(enemy.rect):  # Use player rect for collision check
+                self.player.is_hit = True  # Trigger hit animation for player
+                self.player.current_health -= 10  # Example: Decrease health on collision with enemy
+                
+                # Apply knockback effect based on the enemy position
+                self.player.apply_knockback(enemy.x, enemy.y)  # Apply knockback based on enemy position
+
+                self.enemies.remove(enemy)  # Remove the enemy from the game
+                break  # Break after first collision to avoid checking further enemies
+
+        # Check for player and comet collisions
+        for comet in self.comets:
+            if self.player.rect.colliderect(comet.rect):  # Check if player collides with comets
+                self.player.is_in_hit_animation = True  # Trigger hit animation for player
+                self.player.current_health -= 15  # Example: Decrease health on collision with comet
+                
+                # Apply knockback effect based on the comet position
+                self.player.apply_knockback(comet.x, comet.y)  # Apply knockback based on comet position
 
     def redraw_game_window(self):
         """Redraw the entire game window."""
@@ -71,7 +104,7 @@ class Level:
         for projectile in self.projectiles:
             projectile.draw(self.window)
         
-         # Draw all comets
+        # Draw all comets
         for comet in self.comets:
             comet.draw(self.window)
         self.comets.draw(self.window)  # Draw the comets on the screen
@@ -91,11 +124,15 @@ class Level:
             if event.type == pygame.QUIT:
                 return GameState.QUIT
             elif event.type == pygame.MOUSEBUTTONDOWN:
-
                 if event.button == 1:  # Left-click
                     mouse_x, mouse_y = pygame.mouse.get_pos()
-                    projectile = self.player.handle_attack(mouse_x, mouse_y)
-                    self.projectiles.add(projectile)
+
+                    # Check cooldown before allowing attack
+                    current_time = pygame.time.get_ticks()
+                    if current_time - self.last_attack_time >= self.attack_cooldown:
+                        projectile = self.player.handle_attack(mouse_x, mouse_y)
+                        self.projectiles.add(projectile)
+                        self.last_attack_time = current_time  # Update last attack time
 
         # Handle player input events
         self.player.handle_input()
@@ -110,10 +147,12 @@ class Level:
         # Update comets
         self.comets.update()  # Update comet positions and animations
         
-
         # Spawn and update enemies
         self.spawn_enemy()  # Spawn new enemies every 2 seconds
         self.enemies.update()  # Update enemy movement and animations
+
+        # Check for collisions
+        self.check_collisions()
 
         # Redraw everything
         self.redraw_game_window()  # Call the redraw function
@@ -122,10 +161,3 @@ class Level:
         self.clock.tick(60)  # 60 FPS, adjust if needed
 
         return GameState.NEWGAME
-
-
-
-
-
-
-

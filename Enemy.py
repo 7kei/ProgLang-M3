@@ -32,7 +32,10 @@ class Enemy(pygame.sprite.Sprite):
         # Initialize animation state
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(self.x, self.y))
+        
+        # Set up the hitbox rect and image rect
+        self.rect = self.image.get_rect(center=(self.x, self.y))  # Hitbox for collision detection
+        self.image_rect = self.rect.copy()  # Separate rect for the image (visual transformation)
 
         # Set the player reference to follow dynamically
         self.player = player
@@ -58,7 +61,8 @@ class Enemy(pygame.sprite.Sprite):
         if self.flipped:
             self.image = pygame.transform.flip(self.image, True, False)
         
-        self.rect = self.image.get_rect(center=(self.x, self.y))
+        # Update image_rect based on the flipped image
+        self.image_rect = self.image.get_rect(center=(self.x, self.y))
 
     def move_towards_player(self):
         """Move the enemy towards the player's current position."""
@@ -78,18 +82,13 @@ class Enemy(pygame.sprite.Sprite):
         # Move towards the player's current position
         self.move_towards_player()
 
-        # Update rect and animate
-        self.rect.center = (self.x, self.y)
-        self.update_animation()
+        # Update the enemy animation and rect
+        self.rect.center = (self.x, self.y)  # Update the hitbox position
+        self.update_animation()  # Update the animation and image_rect
 
     def draw(self, window):
         """Draw the enemy on the window and show the hitbox."""
-        window.blit(self.image, self.rect)  # Draw the enemy sprite at its current position
+        window.blit(self.image, self.image_rect.topleft)  # Draw the image at its current position
 
-        # Optional: Draw the hitbox rectangle for visualization
-        # Reduce the size of the hitbox by half (you can adjust this factor as needed)
-        reduced_width = self.rect.width // 1.125
-        reduced_height = self.rect.height // 1.125
-        reduced_rect = pygame.Rect(self.rect.centerx - reduced_width // 2, self.rect.centery - reduced_height // 2, reduced_width, reduced_height)
-
-        pygame.draw.rect(window, (0, 255, 0), reduced_rect, 2)  # Green rectangle with a 2-pixel border for hitbox
+        # Draw the hitbox rectangle for visualization (same as the actual rect)
+        pygame.draw.rect(window, (0, 255, 0), self.rect, 2)  # Green rectangle with a 2-pixel border for hitbox
