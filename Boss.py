@@ -82,7 +82,7 @@ class Boss(pygame.sprite.Sprite):
             # Spawn a comet after the attack animation is triggered
             self.spawn_comet(player_x, comet_group)
 
-        self.update_animation()
+        self.update_animation() 
 
     def spawn_comet(self, player_x, comet_group):
         """Spawn a comet when the boss attacks."""

@@ -34,7 +34,10 @@ class Enemy(pygame.sprite.Sprite):
         # Initialize animation state
         self.animation_index = 0
         self.image = self.frames[self.animation_index]
-        self.rect = self.image.get_rect(center=(self.x, self.y))
+        
+        # Set up the hitbox rect and image rect
+        self.rect = self.image.get_rect(center=(self.x, self.y))  # Hitbox for collision detection
+        self.image_rect = self.rect.copy()  # Separate rect for the image (visual transformation)
 
         # Set the player reference and window
         self.player = player
@@ -63,7 +66,8 @@ class Enemy(pygame.sprite.Sprite):
         if self.flipped:
             self.image = pygame.transform.flip(self.image, True, False)
         
-        self.rect = self.image.get_rect(center=(self.x, self.y))
+        # Update image_rect based on the flipped image
+        self.image_rect = self.image.get_rect(center=(self.x, self.y))
 
     def move_towards_player(self):
         """Move the enemy towards the player's current position."""
