@@ -10,8 +10,8 @@ class Comet(pygame.sprite.Sprite):
         self.x = random.randint(0, 1500)  # Random X position
         self.y = -50  # Spawn above the screen
         self.scale = scale  # Default scaling factor for the comet's size
-        self.speed = 5  # Falling speed
-        self.animation_speed = 0.2  # Speed of animation frame change
+        self.speed = 2 # Falling speed
+        self.animation_speed = 0.15 # Speed of animation frame change
 
         # Track the player's last X position when the comet spawns
         self.target_x = player_x
@@ -67,7 +67,7 @@ class Comet(pygame.sprite.Sprite):
             self.y += self.speed  # Make it fall down
             self.x = self.target_x  # Track the player's X position at the time of spawn
             
-            if self.y >= 790:  # Check if the comet has reached 7 pixels above the ground (790 - 7)
+            if self.y >= 725:  # Check if the comet has reached 7 pixels above the ground (790 - 7)
                 self.state = "explosion"  # Trigger the explosion when it reaches 7 pixels from the ground
                 self.animation_index = 0
                 self.image_rect.center = (self.x, self.y)  # Ensure explosion is centered on the comet's position

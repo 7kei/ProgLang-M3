@@ -7,7 +7,7 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, player, scale=2):
         super().__init__()
 
-        # Initial position logic
+        # Initial position logic (same as before)
         spawn_side = random.choice(["left", "right", "top"])
         if spawn_side == "left":
             self.x = -50
@@ -40,6 +40,10 @@ class Enemy(pygame.sprite.Sprite):
         # Reference to the player for movement
         self.player = player
 
+        # Ritual state
+        self.is_in_ritual = False  # Whether the enemy is in ritual state
+        self.ritual_entered = False  # Flag to track if ritual has been triggered
+
         # Death animation state
         self.dying = False
         self.dying_time = 0
@@ -47,6 +51,9 @@ class Enemy(pygame.sprite.Sprite):
         self.max_scale = 2  # Max size for the death animation
         self.opacity = 255  # Fully opaque for the initial image
         self.initial_image = self.frames[0]  # First frame for death animation
+
+        # Threshold distance to start rotating
+        self.approach_distance = 100  # Distance at which the enemy starts rotating
 
     def load_animation(self, path):
         """Load and downsize all images in a folder as animation frames."""
@@ -56,6 +63,13 @@ class Enemy(pygame.sprite.Sprite):
             downsized_frame = pygame.transform.scale(frame, (frame.get_width() // 4, frame.get_height() // 4))
             frames.append(downsized_frame)
         return frames
+
+    def enter_ritual(self):
+        """Triggers the entry into the ritual state once."""
+        if not self.ritual_entered:
+            self.is_in_ritual = True
+            self.ritual_entered = True
+            print("Enemy has entered the ritual state.")  # Debug log for ritual entry
 
     def update_animation(self):
         """Update the animation frames of the enemy."""
@@ -95,8 +109,8 @@ class Enemy(pygame.sprite.Sprite):
 
     def move_towards_player(self):
         """Move the enemy towards the player's current position."""
-        if self.dying:
-            return  # Don't move if dying
+        if self.dying or self.is_in_ritual:
+            return  # Don't move if dying or in ritual state
 
         target_x, target_y = self.player.rect.center
         angle = math.atan2(target_y - self.y, target_x - self.x)
@@ -109,10 +123,28 @@ class Enemy(pygame.sprite.Sprite):
         else:
             self.flipped = False
 
+    def rotate_around_player(self):
+        """Rotate the enemy counterclockwise around the player's position during the ritual state."""
+        if self.dying:
+            return  # Don't rotate if dying
+
+        # Calculate angle to rotate counterclockwise
+        angle = math.atan2(self.y - self.player.y, self.x - self.player.x) - math.radians(5)  # 5 degrees counterclockwise
+        radius = math.hypot(self.x - self.player.x, self.y - self.player.y)  # Distance from player
+        self.x = self.player.x + radius * math.cos(angle)
+        self.y = self.player.y + radius * math.sin(angle)
+
     def update(self):
         """Update enemy's position and animation."""
-        if not self.dying:
-            self.move_towards_player()  # Move only if not dying
+        # First move towards the player until within the threshold distance
+        distance_to_player = math.hypot(self.x - self.player.x, self.y - self.player.y)
+
+        if distance_to_player > self.approach_distance:
+            self.move_towards_player()  # Move towards player
+        else:
+            if not self.is_in_ritual:  # Enter ritual once when close enough
+                self.enter_ritual()
+            self.rotate_around_player()  # Rotate around player in ritual state
 
         # Update the hitbox position and animation
         self.rect.center = (self.x, self.y)

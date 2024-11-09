@@ -40,8 +40,8 @@ class Player(pygame.sprite.Sprite):
         self.image_rect = self.rect.copy()  # Separate rect for the image (visual transformation)
 
         # Resize the rect (e.g., to shrink the player's hitbox during attack)
-        self.rect.width = self.image_rect.width // 7  # Adjust width (e.g., reduce width by 4)
-        self.rect.height = self.image_rect.height // 4  # Adjust height (e.g., reduce height by 3)
+        self.rect.width = self.image_rect.width // 7  # Adjust width (e.g., reduce width by 7)
+        self.rect.height = self.image_rect.height // 4  # Adjust height (e.g., reduce height by 4)
 
         # Flags to track animation states
         self.in_attack_animation = False
@@ -51,12 +51,18 @@ class Player(pygame.sprite.Sprite):
         self.knockback_timer = 0  # Timer to track the duration of the knockback
         self.hit_timer = 0  # Timer for how long the player stays in the hit state
 
+        # Ritual state flag
+        self.is_in_ritual = False  # Whether the player is in ritual state
+
     def load_animation(self, path):
         """Load all images in a folder as animation frames."""
         return [pygame.image.load(os.path.join(path, img)) for img in sorted(os.listdir(path))]
 
     def handle_input(self):
         """Handle player input for movement, jumping, and attacking."""
+        if self.is_in_ritual:
+            return  # Disable input if the player is in ritual state
+
         if self.is_knocked_back:
             return  # Prevent movement during knockback
 
@@ -92,26 +98,24 @@ class Player(pygame.sprite.Sprite):
                     self.current_animation = "jump"  # Set to jump animation
                     self.jump_animation_index = 0  # Reset jump animation index
 
-            # # Handle jumping mechanics (Gravity and Jumping)
-            # if self.is_jumping:
-            #     if self.jumpCount >= -10:
-            #         neg = 1
-            #         if self.jumpCount < 0:
-            #             neg = -1
-            #         self.y -= (self.jumpCount ** 2) * 0.15 * neg  # Applying slower jump arc
-            #         self.jumpCount -= 0.5  # Extended air time
-            #     else:
-            #         self.is_jumping = False
-            #         self.jumpCount = 10
-            #         # Reset to idle or run animation based on movement
-            #         if keys[pygame.K_LEFT] or keys[pygame.K_a] or keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            #             self.current_animation = "run"
-            #         else:
-            #             self.current_animation = "idle"
+    def enter_ritual(self):
+        """Enter the ritual state and play the hit animation in a loop."""
+        self.is_in_ritual = True
+        self.x = 900  # Move the player to the center of the screen (adjust for your screen size)
+        self.y = 600
+        self.facing_right = True  # Ensure the player is facing right during the ritual
+        self.current_animation = "hit"  # Play the hit animation in a loop
 
     def update_animation(self):
         """Update animation frame based on current action and direction."""
-        if self.is_hit:
+        if self.is_in_ritual:
+            # In ritual, play the hit animation in a loop
+            self.animation_index += 0.12
+            self.facing_right = True
+            if self.animation_index >= len(self.animations["hit"]):
+                self.animation_index = 0  # Loop the hit animation
+            frame = self.animations["hit"][int(self.animation_index)]
+        elif self.is_hit:
             # Trigger hit animation and use the hit timer
             self.current_animation = "hit"
             self.animation_index += 0.12
@@ -210,9 +214,16 @@ class Player(pygame.sprite.Sprite):
             self.is_jumping = False
             self.jumpCount = 10  # Reset jump count
 
+        # Gradually move the player towards the center during ritual
+        if self.is_in_ritual:
+            target_x, target_y = 750, 400  # Ritual target position (center)
+            if abs(self.x - target_x) > self.speed:
+                self.x += self.speed if self.x < target_x else -self.speed
+            if abs(self.y - target_y) > self.speed:
+                self.y += self.speed if self.y < target_y else -self.speed
+
         # Update the hitbox rect to follow the player's position
         self.rect.center = (self.x, self.y)
-
 
     def handle_attack(self, mouse_x, mouse_y):
         """Handle player attack animation and create projectiles."""
