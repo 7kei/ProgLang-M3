@@ -6,35 +6,36 @@ from Boss import *
 from Comet import *
 from Enemy import *
 from pygame.sprite import Group
+from Database import *
+
+BLUE = (106, 159, 181)
+WHITE = (255, 255, 255)
 
 class Level:
     # Load and center background image
     bg = pygame.transform.scale(pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/bg.jpg'), (1800, 1200))
     floor = pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/tile001.png')
 
-    def __init__(self, window):
+    def __init__(self, window, database):
         self.window = window
         self.kill_count = 0
         self.clock = pygame.time.Clock()  # Initialize the clock to control FPS
         self.level_time = pygame.time.get_ticks()  # Track the level time (shared timer)
-        
-        # Group for projectiles
         self.projectiles = Group()
-
-        # Instantiate the Player object
         self.player = Player(x=100, y=790, max_health=100, projectiles=self.projectiles)
         self.boss = Boss(self.level_time, x=1300, y=200, scale=2)  # Adjust coordinates for upper right placement
-
-        # Group for comets
         self.comets = pygame.sprite.Group()
-
-        # Group for enemies
         self.enemies = Group()
-
-        # Timer to track enemy spawn intervals
         self.last_enemy_spawn_time = pygame.time.get_ticks()
+        self.databaseConnection = database
+        self.questions_dict = {}
+        self.enemyList = []
+        self.bullets = []
+        self.initQuestions()
+        self.player_answer = ""
+        self.enemy_group = pygame.sprite.Group()
+        self.player_group = pygame.sprite.GroupSingle()  
         
-        # Load item images and set up positions
         self.items = {
             'item1': {
                 'untoggled': pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/weapons/weapon icons (toggled, untoggled)/1.png'),
@@ -49,6 +50,11 @@ class Level:
                 'toggled': pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/weapons/weapon icons (toggled, untoggled)/6.png')
             }
         }
+        
+    def initQuestions(self):
+        curQues = self.databaseConnection.getQuestions()
+        for i in curQues:
+            self.questions_dict[i[0]] = i[1]
 
         # Initial item positions
         self.item_positions = [(650, 800), (750, 800), (850, 800)]

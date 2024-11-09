@@ -7,6 +7,7 @@ class GameState(Enum):
     TUTORIAL = 4
     PLAYING = 5
     GAMEOVER = 6
+    LEADERBOARD = 12
     FINISH = 7
     QUIT = 8
     LOADING = 10
