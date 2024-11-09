@@ -13,8 +13,8 @@ WHITE = (255, 255, 255)
 
 class Level:
     # Load and center background image
-    bg = pygame.transform.scale(pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/bg.jpg'), (1800, 1200))
-    floor = pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/tile001.png')
+    bg = pygame.transform.scale(pygame.image.load('assets/bg.jpg'), (1800, 1200))
+    floor = pygame.image.load('assets/tile001.png')
 
     def __init__(self, window, database):
         self.window = window
@@ -38,16 +38,16 @@ class Level:
         
         self.items = {
             'item1': {
-                'untoggled': pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/weapons/weapon icons (toggled, untoggled)/1.png'),
-                'toggled': pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/weapons/weapon icons (toggled, untoggled)/2.png')
+                'untoggled': pygame.image.load('assets/weapons/weapon icons (toggled, untoggled)/1.png'),
+                'toggled': pygame.image.load('assets/weapons/weapon icons (toggled, untoggled)/2.png')
             },
             'item2': {
-                'untoggled': pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/weapons/weapon icons (toggled, untoggled)/3.png'),
-                'toggled': pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/weapons/weapon icons (toggled, untoggled)/4.png')
+                'untoggled': pygame.image.load('assets/weapons/weapon icons (toggled, untoggled)/3.png'),
+                'toggled': pygame.image.load('assets/weapons/weapon icons (toggled, untoggled)/4.png')
             },
             'item3': {
-                'untoggled': pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/weapons/weapon icons (toggled, untoggled)/5.png'),
-                'toggled': pygame.image.load('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/weapons/weapon icons (toggled, untoggled)/6.png')
+                'untoggled': pygame.image.load('assets/weapons/weapon icons (toggled, untoggled)/5.png'),
+                'toggled': pygame.image.load('assets/weapons/weapon icons (toggled, untoggled)/6.png')
             }
         }
         

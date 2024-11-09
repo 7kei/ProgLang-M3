@@ -219,6 +219,7 @@ def play_level(screen, database: Database):
                 mouse_up = True
         ui_action = return_btn.update(pygame.mouse.get_pos(), mouse_up)
         if ui_action:
+            pygame.display.set_mode((800,600))
             return ui_action
         return_btn.draw(screen)
         pygame.display.flip()
@@ -456,7 +457,7 @@ def get_player_name_from_database():
 player_name = get_player_name_from_database()
 
 def finish_level(screen):
-
+    pygame.display.set_mode((800,600))
     background = pygame.image.load("New folder/gameover.png")
     title1_font = pygame.font.Font("New folder/JainiPurva-Regular.ttf", 90) 
     title1_text = title1_font.render("YOU WIN", True, WHITE)
@@ -517,6 +518,7 @@ def finish_level(screen):
 
 
 def game_over(screen):
+    pygame.display.set_mode((800,600))
     background = pygame.image.load("New folder/gameover.png")
     title1_font = pygame.font.Font("New folder/JainiPurva-Regular.ttf", 90) 
     title1_text = title1_font.render("GAME OVER!", True, WHITE)
@@ -527,7 +529,6 @@ def game_over(screen):
     quit_btn = UIElement((690, 70), "QUIT GAME", 30, None, WHITE, action=GameState.QUIT)
     leaderboard_btn = UIElement((400, 450), "LEADERBOARD", 30, None, WHITE, action=GameState.LEADERBOARD)
     buttons = [start_btn, quit_btn, leaderboard_btn,return_btn]
-
 
     while True:
         mouse_up = False  # Reset mouse_up at the beginning of each frame

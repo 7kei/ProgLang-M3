@@ -15,10 +15,10 @@ class Boss(pygame.sprite.Sprite):
 
         # Load animations with scaling
         self.animations = {
-            "spawn": self.load_animation('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/boss/spawn'),
-            "idle": self.load_animation('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/boss/idle'),
-            "attack": self.load_animation('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/boss/attack'),
-            "death": self.load_animation('D:/Downloads/A.Y 2024 - 2025/1st Term/CS121/proglang proj/assets/boss/death')
+            "spawn": self.load_animation('assets/boss/spawn'),
+            "idle": self.load_animation('assets/boss/idle'),
+            "attack": self.load_animation('assets/boss/attack'),
+            "death": self.load_animation('assets/boss/death')
         }
 
         # Animation settings
